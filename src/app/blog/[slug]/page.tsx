@@ -1,21 +1,35 @@
-// src/app/blog/[slug]/page.tsx
-import { createClient } from '@/lib/supabase'
+'use client'
 
-export const dynamic = 'force-dynamic' // always fetch fresh
+import { useEffect, useState } from 'react'
+import { usePathname } from 'next/navigation'
+import { createBrowserClient } from '@supabase/ssr'
 
-export default async function Page(props: any) {
-  const { slug } = props.params
-  const supabase = createClient()
+export default function BlogPostPage() {
+  const pathname = usePathname()
+  const slug = pathname.split('/blog/')[1] // extract slug from URL
 
-  const { data: post, error } = await supabase
-    .from('rss_posts')
-    .select('*')
-    .eq('slug', slug)
-    .single()
+  const [post, setPost] = useState<any>(null)
+  const [error, setError] = useState<string | null>(null)
 
-  if (error || !post) {
-    return <p className="p-6 text-red-500">Post not found.</p>
-  }
+  useEffect(() => {
+    const fetchPost = async () => {
+      const supabase = createBrowserClient()
+
+      const { data, error } = await supabase
+        .from('rss_posts')
+        .select('*')
+        .eq('slug', slug)
+        .single()
+
+      if (error) setError(error.message)
+      else setPost(data)
+    }
+
+    if (slug) fetchPost()
+  }, [slug])
+
+  if (error) return <p className="p-6 text-red-500">Error: {error}</p>
+  if (!post) return <p className="p-6">Loading...</p>
 
   return (
     <main className="max-w-3xl mx-auto p-6">
