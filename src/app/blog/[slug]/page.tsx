@@ -1,23 +1,13 @@
+// src/app/blog/[slug]/page.tsx
+
 import { createClient } from '@/lib/supabase'
-import { Metadata } from 'next'
+import { ReactElement } from 'react'
 
-// ✅ Tell Next.js this page uses dynamic data
-export const dynamic = 'force-dynamic'
-
-// ✅ Proper typing for dynamic route pages
-type PageProps = {
-  params: {
-    slug: string
-  }
+type Props = {
+  params: { slug: string }
 }
 
-export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
-  return {
-    title: decodeURIComponent(params.slug),
-  }
-}
-
-export default async function Page({ params }: PageProps) {
+export default async function Page({ params }: Props): Promise<ReactElement> {
   const supabase = createClient()
 
   const { data: post, error } = await supabase
