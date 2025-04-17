@@ -1,5 +1,8 @@
 // src/app/blog/[slug]/page.tsx
+
 import { createClient } from '@/lib/supabase'
+
+export const dynamic = 'force-dynamic'
 
 export default async function Page({ params }: { params: { slug: string } }) {
   const supabase = createClient()
@@ -22,7 +25,7 @@ export default async function Page({ params }: { params: { slug: string } }) {
       </p>
       <p>{post.content}</p>
       {post.link && (
-        <a href={post.link} target="_blank" rel="noopener noreferrer" className="text-blue-600 underline">
+        <a href={post.link} target="_blank" className="text-blue-600 underline">
           Original Source
         </a>
       )}
