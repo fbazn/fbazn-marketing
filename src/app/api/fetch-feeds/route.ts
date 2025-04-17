@@ -3,13 +3,25 @@ import Parser from 'rss-parser'
 import { createClient } from '@supabase/supabase-js'
 import slugify from 'slugify'
 
+type RSSItem = {
+  title?: string
+  content?: string
+  contentSnippet?: string
+  link?: string
+  pubDate?: string
+}
+
+const parser = new Parser()
+
+const FEED_URL = 'https://developer-docs.amazon.com/amazon-shipping/changelog.rss'
+
+const feed = await parser.parseURL(FEED_URL) as { items: RSSItem[], title?: string }
+
+
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
   process.env.SUPABASE_SERVICE_ROLE_KEY!
 )
-
-const FEED_URL = 'https://developer-docs.amazon.com/amazon-shipping/changelog.rss'
-const parser = new Parser()
 
 export async function GET(req: NextRequest) {
   const authHeader = req.headers.get('authorization')
@@ -23,7 +35,7 @@ export async function GET(req: NextRequest) {
     console.log('📡 Fetching RSS feed...')
     const feed = await parser.parseURL(FEED_URL)
 
-    for (const item of feed.items) {
+    for (const item of feed.items as RSSItem) {
       const slug = slugify(item.title || '', { lower: true, strict: true })
 
       const { error } = await supabase.from('rss_posts').upsert(
