@@ -4,7 +4,9 @@ import { createClient } from '@/lib/supabase'
 import { ReactElement } from 'react'
 
 type Props = {
-  params: { slug: string }
+  params: {
+    slug: string
+  }
 }
 
 export default async function Page({ params }: Props): Promise<ReactElement> {
