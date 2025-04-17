@@ -1,21 +1,8 @@
-// src/app/blog/[slug]/page.tsx
-
 import { createClient } from '@/lib/supabase'
-import { Metadata } from 'next'
 
-type PageProps = {
-  params: {
-    slug: string
-  }
-}
+export const dynamic = 'force-dynamic'
 
-export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
-  return {
-    title: `Post: ${params.slug}`,
-  }
-}
-
-export default async function Page({ params }: PageProps) {
+export default async function Page({ params }: { params: { slug: string } }) {
   const supabase = createClient()
 
   const { data: post, error } = await supabase
@@ -36,7 +23,7 @@ export default async function Page({ params }: PageProps) {
       </p>
       <p>{post.content}</p>
       {post.link && (
-        <a href={post.link} target="_blank" className="text-blue-600 underline">
+        <a href={post.link} target="_blank" rel="noopener noreferrer" className="text-blue-600 underline">
           Original Source
         </a>
       )}
