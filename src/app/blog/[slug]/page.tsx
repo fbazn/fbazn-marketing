@@ -1,8 +1,11 @@
 import { createClient } from '@/lib/supabase'
 
-export const dynamic = 'force-dynamic' // disable ISR
+export const dynamic = 'force-dynamic'
 
-export default async function Page({ params }: { params: { slug: string } }) {
+export default async function Page(props: { params: { slug: string } }) {
+  // ✅ Shim params to satisfy Vercel type constraints
+  const { params } = await Promise.resolve(props)
+
   const supabase = createClient()
 
   const { data: post, error } = await supabase
