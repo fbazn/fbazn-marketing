@@ -1,6 +1,5 @@
+// src/app/blog/[slug]/page.tsx
 import { createClient } from '@/lib/supabase'
-
-export const dynamic = 'force-dynamic'
 
 export default async function Page({ params }: { params: { slug: string } }) {
   const supabase = createClient()
