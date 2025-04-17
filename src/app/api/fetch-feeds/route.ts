@@ -11,12 +11,7 @@ type RSSItem = {
   pubDate?: string
 }
 
-const parser = new Parser()
-
 const FEED_URL = 'https://developer-docs.amazon.com/amazon-shipping/changelog.rss'
-
-const feed = await parser.parseURL(FEED_URL) as { items: RSSItem[], title?: string }
-
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -33,9 +28,10 @@ export async function GET(req: NextRequest) {
 
   try {
     console.log('📡 Fetching RSS feed...')
+    const parser = new Parser()
     const feed = await parser.parseURL(FEED_URL)
 
-    for (const item of feed.items as RSSItem) {
+    for (const item of feed.items as RSSItem[]) {
       const slug = slugify(item.title || '', { lower: true, strict: true })
 
       const { error } = await supabase.from('rss_posts').upsert(
@@ -57,9 +53,9 @@ export async function GET(req: NextRequest) {
       }
     }
 
-    return NextResponse.json({ message: 'RSS feed processed' })
-  } catch (err: any) {
-    console.error('❌ Cron failed:', err.message)
+    return NextResponse.json({ message: 'RSS feed processed successfully' })
+  } catch (err: unknown) {
+    console.error('❌ Cron job failed:', (err as Error).message)
     return NextResponse.json({ message: 'Internal Server Error' }, { status: 500 })
   }
 }
