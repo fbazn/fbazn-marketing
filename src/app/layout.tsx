@@ -2,6 +2,7 @@
 
 import './globals.css'
 import type { Metadata } from 'next'
+import Link from 'next/link' // ✅ Required
 
 export const metadata: Metadata = {
   title: 'FBAZN — Amazon FBA Tools',
@@ -16,9 +17,10 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           <div className="max-w-6xl mx-auto flex justify-between items-center">
             <span className="text-xl font-bold text-gray-900">FBAZN</span>
             <nav className="space-x-4 text-sm text-gray-600">
-              <a href="/" className="hover:text-black">Home</a>
-              <a href="/blog" className="hover:text-black">Blog</a>
+              <Link href="/" className="hover:text-black">Home</Link>
+              <Link href="/blog" className="hover:text-black">Blog</Link>
               <a href="https://app.fbazn.com" className="hover:text-black">App</a>
+              {/* External links like app.fbazn.com can stay as <a> */}
             </nav>
           </div>
         </header>
