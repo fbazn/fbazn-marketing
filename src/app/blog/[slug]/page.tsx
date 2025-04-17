@@ -1,20 +1,24 @@
+// src/app/blog/[slug]/page.tsx
+
+import { createClient } from '@/lib/supabase'
+
 type PageProps = {
   params: {
-    slug: string;
-  };
-};
+    slug: string
+  }
+}
 
 export default async function Page({ params }: PageProps) {
-  const supabase = createClient();
+  const supabase = createClient()
 
   const { data: post, error } = await supabase
     .from('rss_posts')
     .select('*')
     .eq('slug', params.slug)
-    .single();
+    .single()
 
   if (error || !post) {
-    return <p className="p-6 text-red-500">Post not found.</p>;
+    return <p className="p-6 text-red-500">Post not found.</p>
   }
 
   return (
@@ -28,5 +32,5 @@ export default async function Page({ params }: PageProps) {
         Original Source
       </a>
     </main>
-  );
+  )
 }
