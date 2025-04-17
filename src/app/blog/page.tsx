@@ -1,4 +1,5 @@
 // src/app/blog/page.tsx
+import { createClient } from '@/lib/supabase'
 
 type BlogPost = {
   slug: string
@@ -9,25 +10,29 @@ type BlogPost = {
   source?: string
 }
 
-export const dynamic = 'force-dynamic' // always fetch fresh
+export const dynamic = 'force-dynamic'
 
 export default async function BlogPage() {
   const supabase = createClient()
-  const { data: posts, error } = await supabase
-    .from('rss_posts')
-    .select('*')
-    .order('published_at', { ascending: false })
+  let posts: BlogPost[] = []
 
-  if (error) {
-    console.error('Error fetching posts:', error.message)
-    return <p className="p-6 text-red-500">Failed to load blog posts.</p>
+  try {
+    const { data, error } = await supabase
+      .from('rss_posts')
+      .select('*')
+      .order('published_at', { ascending: false })
+
+    if (error) throw error
+    posts = data ?? []
+  } catch (err: any) {
+    console.error('Error loading blog posts:', err.message)
   }
 
   return (
     <main className="max-w-3xl mx-auto p-6">
       <h1 className="text-3xl font-bold mb-6">Latest Blog Posts</h1>
-      {posts && posts.length > 0 ? (
-        posts.map((post: BlogPost) => (
+      {posts.length > 0 ? (
+        posts.map((post) => (
           <article key={post.slug} className="mb-6 border-b pb-4">
             <h2 className="text-xl font-semibold">{post.title}</h2>
             <p className="text-sm text-gray-500 mb-2">
