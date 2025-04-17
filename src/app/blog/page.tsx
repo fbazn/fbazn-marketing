@@ -1,5 +1,14 @@
 // src/app/blog/page.tsx
-import { createClient } from '@/lib/supabase'
+import { supabase } from '@/lib/supabase'
+
+type BlogPost = {
+  slug: string
+  title: string
+  content: string
+  link?: string
+  published_at?: string
+  source?: string
+}
 
 export const dynamic = 'force-dynamic' // always fetch fresh
 
@@ -19,12 +28,16 @@ export default async function BlogPage() {
     <main className="max-w-3xl mx-auto p-6">
       <h1 className="text-3xl font-bold mb-6">Latest Blog Posts</h1>
       {posts && posts.length > 0 ? (
-        posts.map((post: any) => (
+        posts.map((post: BlogPost) => (
           <article key={post.slug} className="mb-6 border-b pb-4">
             <h2 className="text-xl font-semibold">{post.title}</h2>
-            <p className="text-sm text-gray-500 mb-2">{new Date(post.published_at).toLocaleDateString()}</p>
+            <p className="text-sm text-gray-500 mb-2">
+              {new Date(post.published_at || '').toLocaleDateString()}
+            </p>
             <p>{post.content}</p>
-            <a href={post.link} target="_blank" className="text-blue-600 underline mt-2 inline-block">Read more</a>
+            <a href={post.link} target="_blank" className="text-blue-600 underline">
+              Read more
+            </a>
           </article>
         ))
       ) : (
