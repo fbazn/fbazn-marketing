@@ -1,8 +1,21 @@
 // src/app/blog/[slug]/page.tsx
 
 import { createClient } from '@/lib/supabase'
+import { Metadata } from 'next'
 
-export default async function Page({ params }: Record<string, any>) {
+type PageProps = {
+  params: {
+    slug: string
+  }
+}
+
+export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
+  return {
+    title: `Post: ${params.slug}`,
+  }
+}
+
+export default async function Page({ params }: PageProps) {
   const supabase = createClient()
 
   const { data: post, error } = await supabase
