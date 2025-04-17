@@ -1,12 +1,8 @@
+// src/app/blog/[slug]/page.tsx
+
 import { createClient } from '@/lib/supabase'
 
-// define props inline – don't use `type Props = ...`
-// this avoids confusion in the Next.js 15 type system
-export default async function Page({
-  params,
-}: {
-  params: { slug: string }
-}): Promise<JSX.Element> {
+export default async function Page({ params }: Record<string, any>) {
   const supabase = createClient()
 
   const { data: post, error } = await supabase
@@ -23,18 +19,11 @@ export default async function Page({
     <main className="max-w-3xl mx-auto p-6">
       <h1 className="text-3xl font-bold mb-2">{post.title}</h1>
       <p className="text-sm text-gray-500 mb-4">
-        {post.published_at
-          ? new Date(post.published_at).toLocaleDateString()
-          : 'Unknown date'}
+        {post.published_at ? new Date(post.published_at).toLocaleDateString() : 'Unknown date'}
       </p>
       <p>{post.content}</p>
       {post.link && (
-        <a
-          href={post.link}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="text-blue-600 underline"
-        >
+        <a href={post.link} target="_blank" className="text-blue-600 underline">
           Original Source
         </a>
       )}
