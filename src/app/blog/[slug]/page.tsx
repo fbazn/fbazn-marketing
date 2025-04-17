@@ -1,16 +1,16 @@
 // src/app/blog/[slug]/page.tsx
-
 import { createClient } from '@/lib/supabase'
 
-export const dynamic = 'force-dynamic'
+export const dynamic = 'force-dynamic' // always fetch fresh
 
-export default async function Page({ params }: { params: { slug: string } }) {
+export default async function Page(props: any) {
+  const { slug } = props.params
   const supabase = createClient()
 
   const { data: post, error } = await supabase
     .from('rss_posts')
     .select('*')
-    .eq('slug', params.slug)
+    .eq('slug', slug)
     .single()
 
   if (error || !post) {
