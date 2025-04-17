@@ -1,5 +1,4 @@
 // src/app/blog/page.tsx
-import { supabase } from '@/lib/supabase'
 
 type BlogPost = {
   slug: string
