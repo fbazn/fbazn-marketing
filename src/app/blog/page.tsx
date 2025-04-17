@@ -1,5 +1,7 @@
 // src/app/blog/page.tsx
 import { createClient } from '@/lib/supabase'
+import Link from 'next/link'
+
 
 type BlogPost = {
   slug: string
@@ -34,7 +36,10 @@ export default async function BlogPage() {
       {posts.length > 0 ? (
         posts.map((post) => (
           <article key={post.slug} className="mb-6 border-b pb-4">
-            <h2 className="text-xl font-semibold">{post.title}</h2>
+            <Link href={`/blog/${post.slug}`}>
+              <h2 className="text-xl font-semibold text-blue-600 hover:underline">{post.title}</h2>
+            </Link>
+
             <p className="text-sm text-gray-500 mb-2">
               {new Date(post.published_at || '').toLocaleDateString()}
             </p>
