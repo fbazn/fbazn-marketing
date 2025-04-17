@@ -1,8 +1,16 @@
 // src/app/blog/[slug]/page.tsx
 
-import { createClient } from '@/lib/supabase'
+interface PageProps {
+  params: {
+    slug: string
+  }
+}
 
-export default async function Page({ params }: { params: { slug: string } }) {
+export default function Page(props: PageProps) {
+  return <PostPage params={props.params} />
+}
+
+async function PostPage({ params }: { params: { slug: string } }) {
   const supabase = createClient()
 
   const { data: post, error } = await supabase
@@ -23,10 +31,10 @@ export default async function Page({ params }: { params: { slug: string } }) {
       </p>
       <p>{post.content}</p>
       {post.link && (
-  <a href={post.link} target="_blank" className="text-blue-600 underline">
-    Original Source
-  </a>
-)}
+        <a href={post.link} target="_blank" className="text-blue-600 underline">
+          Original Source
+        </a>
+      )}
     </main>
   )
 }
