@@ -1,35 +1,51 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { usePathname } from 'next/navigation'
 import { createBrowserClient } from '@supabase/ssr'
 
-export default function BlogPostPage() {
-  const pathname = usePathname()
-  const slug = pathname.split('/blog/')[1] // extract slug from URL
+type BlogPost = {
+  slug: string
+  title: string
+  content: string
+  link?: string
+  published_at?: string
+  source?: string
+}
 
-  const [post, setPost] = useState<any>(null)
+export default function BlogPostPage({ params }: { params: { slug: string } }) {
+  const [post, setPost] = useState<BlogPost | null>(null)
   const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
     const fetchPost = async () => {
-      const supabase = createBrowserClient()
+      const supabase = createBrowserClient(
+        process.env.NEXT_PUBLIC_SUPABASE_URL!,
+        process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+      )
 
       const { data, error } = await supabase
         .from('rss_posts')
         .select('*')
-        .eq('slug', slug)
+        .eq('slug', params.slug)
         .single()
 
-      if (error) setError(error.message)
-      else setPost(data)
+      if (error || !data) {
+        setError('Post not found.')
+      } else {
+        setPost(data)
+      }
     }
 
-    if (slug) fetchPost()
-  }, [slug])
+    fetchPost()
+  }, [params.slug])
 
-  if (error) return <p className="p-6 text-red-500">Error: {error}</p>
-  if (!post) return <p className="p-6">Loading...</p>
+  if (error) {
+    return <p className="p-6 text-red-500">{error}</p>
+  }
+
+  if (!post) {
+    return <p className="p-6">Loading...</p>
+  }
 
   return (
     <main className="max-w-3xl mx-auto p-6">
