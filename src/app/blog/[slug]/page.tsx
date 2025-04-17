@@ -1,11 +1,23 @@
 import { createClient } from '@/lib/supabase'
+import { Metadata } from 'next'
 
+// ✅ Tell Next.js this page uses dynamic data
 export const dynamic = 'force-dynamic'
 
-export default async function Page(props: { params: { slug: string } }) {
-  // ✅ Shim params to satisfy Vercel type constraints
-  const { params } = await Promise.resolve(props)
+// ✅ Proper typing for dynamic route pages
+type PageProps = {
+  params: {
+    slug: string
+  }
+}
 
+export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
+  return {
+    title: decodeURIComponent(params.slug),
+  }
+}
+
+export default async function Page({ params }: PageProps) {
   const supabase = createClient()
 
   const { data: post, error } = await supabase
