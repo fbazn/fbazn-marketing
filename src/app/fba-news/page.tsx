@@ -40,11 +40,15 @@ export default async function BlogPage() {
               <p className="text-xs text-gray-400 uppercase tracking-wide mb-1">
                 {post.source || 'Source Unknown'}
               </p>
-              <p className="text-sm text-gray-500 mb-3">
-                {post.published_at
-                  ? new Date(post.published_at).toLocaleDateString()
-                  : 'Unknown date'}
-              </p>
+              {post.published_at && (
+                <p className="text-sm text-gray-500 mb-1">
+                  {new Date(post.published_at).toLocaleDateString('en-US', {
+                    year: 'numeric',
+                    month: 'long',
+                    day: 'numeric',
+                  })}
+                </p>
+              )}
               <div className="relative group max-h-[100px] overflow-hidden mb-4 transition-max-h duration-500 ease-in-out hover:max-h-[500px]">
               <p className="text-gray-700 mb-4 line-clamp-3 transition-all duration-300 ease-in-out hover:line-clamp-none">
                 {post.content?.slice(0, 200) || 'No preview available'}...
