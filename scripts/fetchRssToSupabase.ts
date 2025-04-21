@@ -9,32 +9,54 @@ const supabase = createClient(
 )
 
 const parser = new Parser()
-const FEED_URL = 'https://developer-docs.amazon.com/amazon-shipping/changelog.rss' // You can test with this
+
+// ✅ Add as many FBA-related RSS feeds here as you'd like:
+const sources = [
+  'https://developer-docs.amazon.com/amazon-shipping/changelog.rss',
+  'https://www.junglescout.com/blog/feed/',
+  'https://sellerengine.com/feed/',
+  'https://channelx.world/tag/amazon/feed/',
+  'https://www.repricerexpress.com/feed/',
+  'https://www.webretailer.com/feed/',
+  'https://www.ecomcrew.com/blog/feed/',
+  'https://amzadvisers.com/feed/',
+]
 
 async function run() {
-  console.log('Fetching RSS feed...')
-  const feed = await parser.parseURL(FEED_URL)
+  console.log('Fetching all RSS feeds...')
 
-  for (const item of feed.items) {
-    const slug = slugify(item.title || '', { lower: true, strict: true })
+  for (const url of sources) {
+    try {
+      const feed = await parser.parseURL(url)
+      console.log(`📡 Fetched from ${url}`)
 
-    const { error } = await supabase.from('rss_posts').upsert({
-      slug,
-      title: item.title,
-      content: item.contentSnippet || item.content || '',
-      link: item.link,
-      published_at: item.pubDate ? new Date(item.pubDate) : new Date(),
-      source: feed.title || 'RSS Feed',
-    }, { onConflict: 'slug' })
+      for (const item of feed.items) {
+        const slug = slugify(item.title || '', { lower: true, strict: true })
 
-    if (error) {
-      console.error(`❌ Error inserting "${item.title}":`, error.message)
-    } else {
-      console.log(`✅ Inserted "${item.title}"`)
+        const { error } = await supabase.from('rss_posts').upsert(
+          {
+            slug,
+            title: item.title,
+            content: item.contentSnippet || item.content || '',
+            link: item.link,
+            published_at: item.pubDate ? new Date(item.pubDate) : new Date(),
+            source: feed.title || new URL(url).hostname,
+          },
+          { onConflict: 'slug' }
+        )
+
+        if (error) {
+          console.error(`❌ Error inserting "${item.title}":`, error.message)
+        } else {
+          console.log(`✅ Inserted "${item.title}"`)
+        }
+      }
+    } catch (err) {
+      console.error(`❌ Failed to parse ${url}:`, err.message)
     }
   }
 
-  console.log('All done.')
+  console.log('✅ All feeds processed.')
 }
 
 run()
