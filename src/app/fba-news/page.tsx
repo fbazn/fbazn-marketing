@@ -6,7 +6,6 @@ type BlogPost = {
   slug: string
   title: string
   content: string
-  contentSnippet?: string | null
   link?: string | null
   published_at?: string | null
   source?: string | null
@@ -44,7 +43,7 @@ export default async function BlogPage() {
                   : 'Unknown date'}
               </p>
               <p className="text-gray-700 mb-4">
-                {post.contentSnippet || post.content?.slice(0, 200) || 'No preview available'}...
+                {post.content?.slice(0, 200) || 'No preview available'}...
               </p>
               {post.link && (
                 <a
