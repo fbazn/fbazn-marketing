@@ -18,7 +18,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             <span className="text-xl font-bold text-gray-900">FBAZN</span>
             <nav className="space-x-4 text-sm text-gray-600">
               <Link href="/" className="hover:text-black">Home</Link>
-              <Link href="/blog" className="hover:text-black">Blog</Link>
+              <Link href="/fba-news" className="hover:text-black">FBA News</Link>
               <a href="https://app.fbazn.com" className="hover:text-black">App</a>
               {/* External links like app.fbazn.com can stay as <a> */}
             </nav>
