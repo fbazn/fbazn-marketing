@@ -52,8 +52,13 @@ async function run() {
         }
       }
     } catch (err) {
-      console.error(`❌ Failed to parse ${url}:`, err.message)
+      if (err instanceof Error) {
+        console.error(`❌ Failed to parse ${url}:`, err.message)
+      } else {
+        console.error(`❌ Failed to parse ${url}:`, err)
+      }
     }
+    
   }
 
   console.log('✅ All feeds processed.')
