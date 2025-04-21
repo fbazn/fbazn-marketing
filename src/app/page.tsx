@@ -1,6 +1,7 @@
 'use client'
 
 import { motion } from 'framer-motion'
+import CTA from './(site)/components/CTA'
 
 export default function Home() {
   return (
@@ -124,23 +125,8 @@ export default function Home() {
         </div>
       </section>
       {/* CALL TO ACTION SECTION */}
-      <section className="bg-blue-600 text-white py-20 text-center">
-        <div className="max-w-2xl mx-auto px-6">
-          <h2 className="text-4xl font-bold mb-6">
-            Ready to take your Amazon FBA sourcing to the next level?
-          </h2>
-          <p className="text-lg mb-8">
-            Sign up now and get early access to fbazn. No credit card required.
-          </p>
-          <a
-            href="#"
-            className="inline-block bg-white text-blue-600 font-semibold py-3 px-6 rounded-lg shadow-lg hover:bg-gray-100 transition"
-          >
-            Get Started Free
-          </a>
-        </div>
-      </section>
-
+      <CTA />
     </main>
   )
 }
+
