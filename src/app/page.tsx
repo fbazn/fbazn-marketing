@@ -1,50 +1,71 @@
-export default function HomePage() {
+'use client'
+
+import { motion } from 'framer-motion'
+
+export default function Home() {
   return (
-    <main className="max-w-6xl mx-auto px-6 py-12 space-y-24">
-      {/* Hero Section */}
-      <section className="text-center space-y-4">
-        <h1 className="text-5xl font-bold">Take Control of Your Amazon FBA Profits</h1>
-        <p className="text-lg text-gray-600 max-w-xl mx-auto">
-          fbazn helps you source smarter, track profitability, and make confident decisions.
-        </p>
-        <button className="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition">
-          Join the Waitlist
-        </button>
+    <main className="bg-white text-gray-900">
+      {/* HERO */}
+      <section className="min-h-screen flex flex-col items-center justify-center px-6 text-center">
+        <motion.h1
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6 }}
+          className="text-5xl md:text-6xl font-bold leading-tight mb-4"
+        >
+          Your All-in-One Amazon FBA Dashboard
+        </motion.h1>
+        <motion.p
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.8 }}
+          className="text-xl text-gray-600 max-w-xl mb-6"
+        >
+          fbazn helps you source products, analyze profits, and stay on top of the latest Amazon updates — all in one sleek interface.
+        </motion.p>
+        <motion.a
+          href="#"
+          whileHover={{ scale: 1.05 }}
+          className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-md font-semibold transition-all"
+        >
+          Get Started Free
+        </motion.a>
       </section>
 
-      {/* Features */}
-      <section className="grid md:grid-cols-3 gap-8 text-center">
-        <FeatureCard title="Product Sourcing" description="Manage and compare supplier offers in one place." />
-        <FeatureCard title="Profit Tracking" description="See ROI and fees instantly for any ASIN." />
-        <FeatureCard title="Live FBA Data" description="Stay on top of Buy Box prices and Amazon charges." />
-      </section>
-
-      {/* FBA News Teaser */}
-      <section className="text-center space-y-4">
-        <h2 className="text-3xl font-semibold">Latest FBA News</h2>
-        <p className="text-gray-600">Curated updates and changelogs from Amazon and trusted FBA sources.</p>
-        <a href="/fba-news" className="text-blue-600 underline">
-          See the latest updates →
-        </a>
-      </section>
-
-      {/* Footer / CTA */}
-      <section className="text-center space-y-4">
-        <h3 className="text-2xl font-medium">Launching soon</h3>
-        <p className="text-gray-600">Be among the first to try fbazn.</p>
-        <button className="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition">
-          Join the Waitlist
-        </button>
+      {/* FEATURES */}
+      <section className="py-20 bg-gray-50">
+        <div className="max-w-6xl mx-auto px-6">
+          <h2 className="text-3xl font-bold text-center mb-12">Why FBA Sellers Love fbazn</h2>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-10">
+            {[
+              {
+                title: 'Smarter Sourcing',
+                desc: 'Link supplier data to ASINs, track profits and ROI instantly.',
+              },
+              {
+                title: 'Always Up-To-Date',
+                desc: 'Auto-sync with Amazon updates and FBA news via RSS.',
+              },
+              {
+                title: 'Built for Speed',
+                desc: 'Clean design, fast loading, mobile-friendly — no clutter.',
+              },
+            ].map((feature, idx) => (
+              <motion.div
+                key={idx}
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ delay: idx * 0.2 }}
+                className="bg-white shadow-md p-6 rounded-lg"
+              >
+                <h3 className="text-xl font-semibold mb-2">{feature.title}</h3>
+                <p className="text-gray-600">{feature.desc}</p>
+              </motion.div>
+            ))}
+          </div>
+        </div>
       </section>
     </main>
-  )
-}
-
-function FeatureCard({ title, description }: { title: string; description: string }) {
-  return (
-    <div className="p-6 border rounded-lg shadow-sm hover:shadow-md transition">
-      <h3 className="text-xl font-semibold mb-2">{title}</h3>
-      <p className="text-gray-600">{description}</p>
-    </div>
   )
 }
