@@ -66,6 +66,45 @@ export default function Home() {
           </div>
         </div>
       </section>
+      {/* HOW IT WORKS */}
+      <section className="py-20 bg-white">
+        <div className="max-w-6xl mx-auto px-6">
+          <h2 className="text-3xl font-bold text-center mb-12">How It Works</h2>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-10">
+            {[
+              {
+                step: '1',
+                title: 'Add Supplier Data',
+                desc: 'Enter potential inventory and costs. We’ll help you calculate margins and match ASINs.',
+              },
+              {
+                step: '2',
+                title: 'Link to Amazon Listings',
+                desc: 'Use the ASIN link to pull in live Buy Box prices, FBA fees, and profitability insights.',
+              },
+              {
+                step: '3',
+                title: 'Track ROI & Stay Updated',
+                desc: 'Monitor your product opportunities and view the latest Amazon FBA updates from our curated news feed.',
+              },
+            ].map((item, idx) => (
+              <motion.div
+                key={idx}
+                initial={{ opacity: 0, y: 30 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ delay: idx * 0.2 }}
+                className="text-center p-6 border rounded-lg shadow-sm"
+              >
+                <div className="text-4xl font-bold text-blue-600 mb-4">{item.step}</div>
+                <h3 className="text-xl font-semibold mb-2">{item.title}</h3>
+                <p className="text-gray-600">{item.desc}</p>
+              </motion.div>
+            ))}
+          </div>
+        </div>
+      </section>
+
     </main>
   )
 }
