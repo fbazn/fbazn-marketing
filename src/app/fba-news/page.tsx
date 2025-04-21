@@ -42,9 +42,12 @@ export default async function BlogPage() {
                   ? new Date(post.published_at).toLocaleDateString()
                   : 'Unknown date'}
               </p>
-              <p className="text-gray-700 mb-4">
-                {post.content?.slice(0, 200) || 'No preview available'}...
-              </p>
+              <div className="relative group max-h-[100px] overflow-hidden mb-4 transition-max-h duration-500 ease-in-out hover:max-h-[500px]">
+                <p className="text-gray-700">
+                  {post.content?.slice(0, 600) || 'No preview available'}
+                </p>
+                <div className="absolute bottom-0 left-0 w-full h-10 bg-gradient-to-t from-white to-transparent group-hover:opacity-0 transition-opacity duration-300" />
+              </div>
               {post.link && (
                 <a
                   href={post.link}
