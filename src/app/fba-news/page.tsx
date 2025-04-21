@@ -37,15 +37,18 @@ export default async function BlogPage() {
               className="bg-white border border-gray-200 rounded-lg p-6 shadow-sm hover:shadow-md transition-shadow"
             >
               <h2 className="text-2xl font-semibold text-gray-900 mb-2">{post.title}</h2>
+              <p className="text-xs text-gray-400 uppercase tracking-wide mb-1">
+                {post.source || 'Source Unknown'}
+              </p>
               <p className="text-sm text-gray-500 mb-3">
                 {post.published_at
                   ? new Date(post.published_at).toLocaleDateString()
                   : 'Unknown date'}
               </p>
               <div className="relative group max-h-[100px] overflow-hidden mb-4 transition-max-h duration-500 ease-in-out hover:max-h-[500px]">
-                <p className="text-gray-700">
-                  {post.content?.slice(0, 600) || 'No preview available'}
-                </p>
+              <p className="text-gray-700 mb-4 line-clamp-3 transition-all duration-300 ease-in-out hover:line-clamp-none">
+                {post.content?.slice(0, 200) || 'No preview available'}...
+              </p>
                 <div className="absolute bottom-0 left-0 w-full h-10 bg-gradient-to-t from-white to-transparent group-hover:opacity-0 transition-opacity duration-300" />
               </div>
               {post.link && (
