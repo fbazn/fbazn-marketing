@@ -104,6 +104,42 @@ export default function Home() {
           </div>
         </div>
       </section>
+      {/* TESTIMONIAL SECTION */}
+      <section className="py-20 bg-gray-100">
+        <div className="max-w-4xl mx-auto px-6 text-center">
+          <h2 className="text-3xl font-bold mb-12">Trusted by Amazon Sellers</h2>
+
+          <motion.blockquote
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.6 }}
+            className="text-xl italic text-gray-700 max-w-2xl mx-auto"
+          >
+            “fbazn has completely changed how I evaluate my product sourcing. 
+            It’s like having Sellerboard and Helium10 in one place — but faster and simpler.”
+          </motion.blockquote>
+
+          <div className="mt-6 text-gray-500 text-sm">— Beta Seller, FBA Entrepreneur</div>
+        </div>
+      </section>
+      {/* CALL TO ACTION SECTION */}
+      <section className="bg-blue-600 text-white py-20 text-center">
+        <div className="max-w-2xl mx-auto px-6">
+          <h2 className="text-4xl font-bold mb-6">
+            Ready to take your Amazon FBA sourcing to the next level?
+          </h2>
+          <p className="text-lg mb-8">
+            Sign up now and get early access to fbazn. No credit card required.
+          </p>
+          <a
+            href="#"
+            className="inline-block bg-white text-blue-600 font-semibold py-3 px-6 rounded-lg shadow-lg hover:bg-gray-100 transition"
+          >
+            Get Started Free
+          </a>
+        </div>
+      </section>
 
     </main>
   )
