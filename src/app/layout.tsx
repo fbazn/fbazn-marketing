@@ -15,7 +15,11 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <body className="min-h-screen flex flex-col">
         <header className="bg-white shadow-md px-6 py-4">
           <div className="max-w-6xl mx-auto flex justify-between items-center">
-            <span className="text-xl font-bold text-gray-900">FBAZN</span>
+            <img
+              src="/fbazn-logo.svg"
+              alt="FBAZN logo"
+              className="h-8 w-auto"
+            />
             <nav className="space-x-4 text-sm text-gray-600">
               <Link href="/" className="hover:text-black">Home</Link>
               <Link href="/fba-news" className="hover:text-black">FBA News</Link>
