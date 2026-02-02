@@ -7,6 +7,9 @@ import Link from 'next/link' // ✅ Required
 export const metadata: Metadata = {
   title: 'FBAZN — Amazon FBA Tools',
   description: 'A smart toolkit for Amazon FBA sellers',
+  icons: {
+    icon: '/favicon.svg',
+  },
 }
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
