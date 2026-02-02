@@ -2,8 +2,8 @@ import Link from 'next/link'
 
 export default function Footer() {
   return (
-    <section className="bg-slate-900 text-white">
-      <div className="mx-auto max-w-6xl px-6 py-16">
+    <section className="flex min-h-screen snap-start snap-always items-center bg-slate-900 pb-12 pt-28 text-white">
+      <div className="mx-auto w-full max-w-6xl px-6">
         <div className="flex flex-col items-center justify-between gap-8 rounded-3xl border border-white/10 bg-slate-800/60 px-8 py-12 text-center md:flex-row md:text-left">
           <div>
             <p className="text-sm font-semibold uppercase tracking-[0.2em] text-teal-300">Ready to move faster?</p>

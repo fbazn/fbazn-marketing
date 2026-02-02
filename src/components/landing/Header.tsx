@@ -1,14 +1,29 @@
+'use client'
+
+import type { MouseEvent } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
 
 const navItems = [
-  { label: 'Features', href: '#features' },
-  { label: 'How it works', href: '#how' },
-  { label: 'Pricing', href: '#pricing' },
-  { label: 'FAQ', href: '#faq' },
+  { label: 'Features', href: '#features', id: 'features' },
+  { label: 'How it works', href: '#how', id: 'how' },
+  { label: 'Pricing', href: '#pricing', id: 'pricing' },
+  { label: 'FAQ', href: '#faq', id: 'faq' },
 ]
 
-export default function Header() {
+type HeaderProps = {
+  onNavigate?: (id: string) => void
+}
+
+export default function Header({ onNavigate }: HeaderProps) {
+  const handleNavClick = (id: string) => (event: MouseEvent<HTMLAnchorElement>) => {
+    if (!onNavigate) {
+      return
+    }
+    event.preventDefault()
+    onNavigate(id)
+  }
+
   return (
     <header className="sticky top-0 z-50 border-b border-slate-200/80 bg-white/80 backdrop-blur">
       <div className="mx-auto flex max-w-6xl items-center justify-between px-6 py-4">
@@ -24,7 +39,12 @@ export default function Header() {
         </Link>
         <nav className="hidden items-center gap-6 text-sm font-medium text-slate-600 md:flex">
           {navItems.map((item) => (
-            <a key={item.href} href={item.href} className="transition hover:text-slate-900">
+            <a
+              key={item.href}
+              href={item.href}
+              onClick={handleNavClick(item.id)}
+              className="transition hover:text-slate-900"
+            >
               {item.label}
             </a>
           ))}
