@@ -1,8 +1,23 @@
+'use client'
+
+import type { MouseEvent } from 'react'
 import Link from 'next/link'
 
-export default function Hero() {
+type HeroProps = {
+  onScrollToId?: (id: string) => void
+}
+
+export default function Hero({ onScrollToId }: HeroProps) {
+  const handleFeaturesClick = (event: MouseEvent<HTMLAnchorElement>) => {
+    if (!onScrollToId) {
+      return
+    }
+    event.preventDefault()
+    onScrollToId('features')
+  }
+
   return (
-    <section className="relative overflow-hidden bg-white pb-16 pt-20">
+    <section className="relative flex min-h-screen snap-start snap-always items-center overflow-hidden bg-white pb-12 pt-28">
       <div className="absolute inset-0">
         <div className="absolute -top-32 right-0 h-72 w-72 rounded-full bg-teal-200/40 blur-3xl" />
         <div className="absolute -bottom-40 left-0 h-72 w-72 rounded-full bg-sky-200/40 blur-3xl" />
@@ -28,6 +43,7 @@ export default function Hero() {
           </Link>
           <a
             href="#features"
+            onClick={handleFeaturesClick}
             className="inline-flex items-center justify-center rounded-full border border-slate-300 px-6 py-3 text-sm font-semibold text-slate-700 transition hover:-translate-y-0.5 hover:border-slate-400 hover:text-slate-900"
           >
             See features

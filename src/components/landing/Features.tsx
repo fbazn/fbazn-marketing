@@ -27,8 +27,8 @@ const features = [
 
 export default function Features() {
   return (
-    <section id="features" className="bg-slate-50 py-20">
-      <div className="mx-auto max-w-6xl px-6">
+    <section id="features" className="flex min-h-screen snap-start snap-always items-start bg-slate-50 pb-12 pt-28">
+      <div className="mx-auto w-full max-w-6xl px-6">
         <div className="mx-auto max-w-2xl text-center">
           <p className="text-sm font-semibold uppercase tracking-[0.2em] text-teal-600">Features</p>
           <h2 className="mt-3 text-3xl font-semibold text-slate-900 sm:text-4xl">

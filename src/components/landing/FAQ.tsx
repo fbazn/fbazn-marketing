@@ -27,30 +27,32 @@ const faqs = [
 
 export default function FAQ() {
   return (
-    <section id="faq" className="py-20">
-      <div className="mx-auto max-w-6xl px-6">
-        <div className="mx-auto max-w-2xl text-center">
-          <p className="text-sm font-semibold uppercase tracking-[0.2em] text-teal-600">FAQ</p>
-          <h2 className="mt-3 text-3xl font-semibold text-slate-900 sm:text-4xl">Questions, answered</h2>
-          <p className="mt-4 text-lg text-slate-600">
-            Everything you need to know before you start sourcing with FBAZN.
-          </p>
-        </div>
-        <div className="mt-12 grid gap-4 md:grid-cols-2">
-          {faqs.map((faq) => (
-            <details
-              key={faq.question}
-              className="group rounded-2xl border border-slate-200 bg-white p-6 shadow-sm"
-            >
-              <summary className="flex cursor-pointer list-none items-center justify-between text-base font-semibold text-slate-900">
-                {faq.question}
-                <span className="ml-4 text-xl text-slate-400 transition group-open:rotate-45 group-open:text-slate-600">
-                  +
-                </span>
-              </summary>
-              <p className="mt-4 text-sm leading-relaxed text-slate-600">{faq.answer}</p>
-            </details>
-          ))}
+    <section id="faq" className="flex min-h-screen snap-start snap-always items-start pb-12 pt-28">
+      <div className="mx-auto w-full max-w-6xl px-6">
+        <div className="max-h-[calc(100vh-var(--header-height))] overflow-y-auto pb-4">
+          <div className="mx-auto max-w-2xl text-center">
+            <p className="text-sm font-semibold uppercase tracking-[0.2em] text-teal-600">FAQ</p>
+            <h2 className="mt-3 text-3xl font-semibold text-slate-900 sm:text-4xl">Questions, answered</h2>
+            <p className="mt-4 text-lg text-slate-600">
+              Everything you need to know before you start sourcing with FBAZN.
+            </p>
+          </div>
+          <div className="mt-12 grid gap-4 md:grid-cols-2">
+            {faqs.map((faq) => (
+              <details
+                key={faq.question}
+                className="group rounded-2xl border border-slate-200 bg-white p-6 shadow-sm"
+              >
+                <summary className="flex cursor-pointer list-none items-center justify-between text-base font-semibold text-slate-900">
+                  {faq.question}
+                  <span className="ml-4 text-xl text-slate-400 transition group-open:rotate-45 group-open:text-slate-600">
+                    +
+                  </span>
+                </summary>
+                <p className="mt-4 text-sm leading-relaxed text-slate-600">{faq.answer}</p>
+              </details>
+            ))}
+          </div>
         </div>
       </div>
     </section>

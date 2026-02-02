@@ -15,8 +15,8 @@ const steps = [
 
 export default function HowItWorks() {
   return (
-    <section id="how" className="py-20">
-      <div className="mx-auto max-w-6xl px-6">
+    <section id="how" className="flex min-h-screen snap-start snap-always items-start pb-12 pt-28">
+      <div className="mx-auto w-full max-w-6xl px-6">
         <div className="mx-auto max-w-2xl text-center">
           <p className="text-sm font-semibold uppercase tracking-[0.2em] text-teal-600">How it works</p>
           <h2 className="mt-3 text-3xl font-semibold text-slate-900 sm:text-4xl">A faster sourcing workflow</h2>
