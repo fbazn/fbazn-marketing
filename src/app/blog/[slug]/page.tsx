@@ -4,7 +4,12 @@ import { createClient } from '@supabase/supabase-js'
 import type { Metadata } from 'next'
 import ReactMarkdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
+import rehypeRaw from 'rehype-raw'
 import Header from '@/components/landing/Header'
+
+function stripFrontmatter(markdown: string): string {
+  return markdown.replace(/^---[\s\S]*?---\n?/, '')
+}
 
 type ArticleRow = {
   id: string
@@ -132,6 +137,7 @@ export default async function ArticlePage({
           <div>
             <ReactMarkdown
               remarkPlugins={[remarkGfm]}
+              rehypePlugins={[rehypeRaw]}
               components={{
                 h1: ({ children }) => (
                   <h1 className="mb-4 mt-10 text-3xl font-bold text-slate-900">{children}</h1>
@@ -207,7 +213,7 @@ export default async function ArticlePage({
                 ),
               }}
             >
-              {post.markdown}
+              {stripFrontmatter(post.markdown)}
             </ReactMarkdown>
           </div>
 
