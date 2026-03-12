@@ -5,10 +5,10 @@ import Image from 'next/image'
 import Link from 'next/link'
 
 const navItems = [
-  { label: 'Features', href: '#features', id: 'features' },
-  { label: 'How it works', href: '#how', id: 'how' },
-  { label: 'Pricing', href: '#pricing', id: 'pricing' },
-  { label: 'FAQ', href: '#faq', id: 'faq' },
+  { label: 'Features', href: '/#features', id: 'features' },
+  { label: 'How it works', href: '/#how', id: 'how' },
+  { label: 'Pricing', href: '/#pricing', id: 'pricing' },
+  { label: 'FAQ', href: '/#faq', id: 'faq' },
 ]
 
 type HeaderProps = {
@@ -48,6 +48,9 @@ export default function Header({ onNavigate }: HeaderProps) {
               {item.label}
             </a>
           ))}
+          <Link href="/blog" className="transition hover:text-slate-900">
+            Blog
+          </Link>
         </nav>
         <Link
           href="/login"
