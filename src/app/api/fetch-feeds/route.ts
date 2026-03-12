@@ -13,12 +13,11 @@ type RSSItem = {
 
 const FEED_URL = 'https://developer-docs.amazon.com/amazon-shipping/changelog.rss'
 
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!
-)
-
 export async function GET(req: NextRequest) {
+  const supabase = createClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.SUPABASE_SERVICE_ROLE_KEY!
+  )
   const authHeader = req.headers.get('authorization')
   const cronSecret = process.env.CRON_SECRET
 
