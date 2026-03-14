@@ -3,14 +3,14 @@ import type { Metadata } from 'next'
 import Header from '@/components/landing/Header'
 
 export const metadata: Metadata = {
-  title: 'Free Tools – FBAZN',
+  title: 'Tools – FBAZN',
   description:
     'Free Amazon FBA tools to help you find profitable products and calculate your margins.',
 }
 
 const tools = [
   {
-    href: '/free-tools/fba-calculator',
+    href: '/tools/fba-calculator',
     title: 'FBA Profit Calculator',
     description:
       'Enter a buy box price and supplier cost to instantly calculate your referral fee, fulfilment fee, net profit, ROI, and margin.',
@@ -25,7 +25,7 @@ export default function FreeToolsPage() {
       <main className="min-h-screen bg-white px-4 py-16">
         <div className="mx-auto max-w-3xl">
           <p className="text-sm font-semibold uppercase tracking-widest text-indigo-600">
-            Free Tools
+            Tools
           </p>
           <h1 className="mt-2 text-4xl font-bold text-slate-900">
             Tools for Amazon FBA sellers

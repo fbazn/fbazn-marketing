@@ -102,8 +102,8 @@ export default function FbaCalculatorPage() {
       <Header />
       <main className="min-h-screen bg-white px-4 py-16">
         <div className="mx-auto max-w-2xl">
-          <Link href="/free-tools" className="text-sm text-slate-400 hover:text-indigo-600">
-            ← Free Tools
+          <Link href="/tools" className="text-sm text-slate-400 hover:text-indigo-600">
+            ← Tools
           </Link>
 
           <div className="mt-4">
