@@ -19,12 +19,12 @@ export default function CTA() {
       <p className="text-lg text-gray-600 dark:text-gray-300 mb-8 max-w-xl mx-auto">
         fbazn helps you make smarter sourcing decisions, track profitability, and stay up to date with Amazon news — all in one place.
       </p>
-      <Link
-        href="/signup"
+      <a
+        href="https://app.fbazn.com/login?mode=signup"
         className="inline-block bg-blue-600 text-white px-8 py-4 rounded-full text-lg font-semibold hover:bg-blue-700 transition"
       >
-        Get Started Free →
-      </Link>
+        Start free trial →
+      </a>
     </motion.section>
   )
 }

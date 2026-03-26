@@ -1,19 +1,27 @@
 'use client'
 
-import type { MouseEvent } from 'react'
-import Link from 'next/link'
+import type { MouseEvent, FormEvent } from 'react'
+import { useState } from 'react'
 
 type HeroProps = {
   onScrollToId?: (id: string) => void
 }
 
 export default function Hero({ onScrollToId }: HeroProps) {
+  const [email, setEmail] = useState('')
+
   const handleFeaturesClick = (event: MouseEvent<HTMLAnchorElement>) => {
-    if (!onScrollToId) {
-      return
-    }
+    if (!onScrollToId) return
     event.preventDefault()
     onScrollToId('features')
+  }
+
+  const handleSignup = (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault()
+    const url = new URL('https://app.fbazn.com/login')
+    if (email) url.searchParams.set('email', email)
+    url.searchParams.set('mode', 'signup')
+    window.location.href = url.toString()
   }
 
   return (
@@ -34,19 +42,29 @@ export default function Hero({ onScrollToId }: HeroProps) {
             Evaluate products in seconds, save leads, and understand true profit after fees — with sourcing tools and an FBA dashboard built for sellers.
           </p>
         </div>
-        <div className="flex flex-col items-center justify-center gap-4 sm:flex-row">
-          <Link
-            href="/login"
-            className="inline-flex items-center justify-center rounded-full bg-slate-900 px-6 py-3 text-sm font-semibold text-white shadow-lg shadow-slate-900/15 transition hover:-translate-y-0.5 hover:bg-slate-800"
+        <form onSubmit={handleSignup} className="mx-auto flex w-full max-w-md flex-col gap-3 sm:flex-row">
+          <input
+            type="email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            placeholder="Enter your email"
+            className="h-12 flex-1 rounded-full border border-slate-300 bg-white px-5 text-sm text-slate-900 shadow-sm placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-900"
+          />
+          <button
+            type="submit"
+            className="inline-flex h-12 items-center justify-center rounded-full bg-slate-900 px-6 text-sm font-semibold text-white shadow-lg shadow-slate-900/15 transition hover:-translate-y-0.5 hover:bg-slate-800"
           >
-            Get started free
-          </Link>
+            Start free trial
+          </button>
+        </form>
+        <div className="flex flex-col items-center gap-3">
+          <p className="text-sm text-slate-500">7-day free trial · No card required</p>
           <a
             href="#features"
             onClick={handleFeaturesClick}
-            className="inline-flex items-center justify-center rounded-full border border-slate-300 px-6 py-3 text-sm font-semibold text-slate-700 transition hover:-translate-y-0.5 hover:border-slate-400 hover:text-slate-900"
+            className="text-sm font-semibold text-slate-600 underline-offset-2 hover:text-slate-900 hover:underline"
           >
-            See features
+            See how it works →
           </a>
         </div>
         <div className="mx-auto flex flex-wrap items-center justify-center gap-4 text-sm text-slate-500">

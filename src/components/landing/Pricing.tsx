@@ -2,29 +2,29 @@ import Link from 'next/link'
 
 const tiers = [
   {
-    name: 'Basic',
-    price: '£9',
+    name: 'Starter',
+    price: '£10',
     period: '/mo',
-    description: 'For new sellers validating early product ideas.',
-    features: ['Fee-aware profit calculator', 'Lead list with notes', 'Market snapshot summary'],
-    cta: { label: 'Get started', href: '/login' },
-  },
-  {
-    name: 'Advanced',
-    price: '£20',
-    period: '/mo',
-    description: 'For active sellers who want faster sourcing decisions.',
-    features: ['Bulk ASIN import', 'Opportunity scoring', 'Saved comparisons & exports'],
-    cta: { label: 'Get started', href: '/login' },
-    highlight: true,
+    description: 'Everything you need to start sourcing profitable products.',
+    features: ['Chrome Extension → Review Queue', 'Full profit calculator', 'Sourcing List & Archived Products', 'Supplier directory', 'Up to 250 products'],
+    cta: { label: 'Start free trial', href: 'https://app.fbazn.com/login?mode=signup' },
   },
   {
     name: 'Pro',
+    price: '£25',
+    period: '/mo',
+    description: 'Deeper data and inventory tracking for serious sellers.',
+    features: ['Everything in Starter', 'Inventory import & dashboard', 'Inbound order tracking', 'Invoice OCR & confirmation', 'Up to 1,000 products'],
+    cta: { label: 'Start free trial', href: 'https://app.fbazn.com/login?mode=signup' },
+    highlight: true,
+  },
+  {
+    name: 'Business',
     price: '£49',
     period: '/mo',
-    description: 'For teams scaling sourcing at volume.',
-    features: ['Team workspaces', 'Advanced automation', 'Priority roadmap access'],
-    cta: { label: 'Notify me', href: 'mailto:hello@fbazn.com' },
+    description: 'Maximum power for high-volume sellers and small teams.',
+    features: ['Everything in Pro', 'Unlimited products', 'Team seats (up to 5 users)', 'Automated lead generation', 'Priority support'],
+    cta: { label: 'Coming soon', href: 'mailto:hello@fbazn.com' },
     comingSoon: true,
   },
 ]
@@ -80,7 +80,7 @@ export default function Pricing() {
                   </ul>
                 </div>
                 <div className="mt-8">
-                  {tier.cta.href.startsWith('mailto:') ? (
+                  {tier.comingSoon ? (
                     <a
                       href={tier.cta.href}
                       className="inline-flex w-full items-center justify-center rounded-full border border-slate-300 px-4 py-2 text-sm font-semibold text-slate-700 transition hover:border-slate-400 hover:text-slate-900"
@@ -88,12 +88,12 @@ export default function Pricing() {
                       {tier.cta.label}
                     </a>
                   ) : (
-                    <Link
+                    <a
                       href={tier.cta.href}
                       className="inline-flex w-full items-center justify-center rounded-full bg-slate-900 px-4 py-2 text-sm font-semibold text-white transition hover:bg-slate-800"
                     >
                       {tier.cta.label}
-                    </Link>
+                    </a>
                   )}
                 </div>
               </div>
