@@ -23,6 +23,7 @@ type ArticlePreview = {
   meta_description: string
   tags: string[]
   created_at: string
+  cover_image_url: string | null
 }
 
 function getSupabase() {
@@ -37,7 +38,7 @@ export default async function BlogPage() {
 
   const { data: articles, error } = await supabase
     .from('blog_articles')
-    .select('slug, meta_title, meta_description, tags, created_at')
+    .select('slug, meta_title, meta_description, tags, created_at, cover_image_url')
     .order('created_at', { ascending: false })
 
   if (error) {
@@ -75,8 +76,22 @@ export default async function BlogPage() {
                   <Link
                     key={article.slug}
                     href={`/blog/${article.slug}`}
-                    className="group flex flex-col rounded-2xl border border-slate-100 bg-white p-6 shadow-sm transition hover:-translate-y-1 hover:shadow-md"
+                    className="group flex flex-col rounded-2xl border border-slate-100 bg-white shadow-sm transition hover:-translate-y-1 hover:shadow-md overflow-hidden"
                   >
+                    {/* Cover image */}
+                    {article.cover_image_url ? (
+                      <div className="h-44 w-full overflow-hidden bg-slate-100">
+                        <img
+                          src={article.cover_image_url}
+                          alt={article.meta_title}
+                          className="h-full w-full object-cover transition group-hover:scale-105"
+                        />
+                      </div>
+                    ) : (
+                      <div className="h-44 w-full bg-gradient-to-br from-teal-50 to-slate-100" />
+                    )}
+
+                    <div className="flex flex-1 flex-col p-6">
                     {/* Tags */}
                     {article.tags && article.tags.length > 0 && (
                       <div className="mb-3 flex flex-wrap gap-1.5">
@@ -113,6 +128,7 @@ export default async function BlogPage() {
                       <span className="text-xs font-medium text-teal-600 transition group-hover:underline">
                         Read more →
                       </span>
+                    </div>
                     </div>
                   </Link>
                 ))}

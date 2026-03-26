@@ -20,6 +20,8 @@ type ArticleRow = {
   markdown: string
   status: string
   created_at: string
+  cover_image_url: string | null
+  cover_image_attribution: string | null
 }
 
 function getSupabase() {
@@ -37,7 +39,7 @@ export async function generateMetadata({
   const { slug } = await params
   const { data } = await getSupabase()
     .from('blog_articles')
-    .select('meta_title, meta_description')
+    .select('meta_title, meta_description, cover_image_url')
     .eq('slug', slug)
     .single()
 
@@ -50,11 +52,13 @@ export async function generateMetadata({
       title: data.meta_title,
       description: data.meta_description,
       type: 'article',
+      ...(data.cover_image_url ? { images: [{ url: data.cover_image_url }] } : {}),
     },
     twitter: {
       card: 'summary_large_image',
       title: data.meta_title,
       description: data.meta_description,
+      ...(data.cover_image_url ? { images: [data.cover_image_url] } : {}),
     },
   }
 }
@@ -132,6 +136,23 @@ export default async function ArticlePage({
           </p>
 
           <hr className="my-8 border-slate-100" />
+
+          {/* Cover image */}
+          {post.cover_image_url && (
+            <div className="mb-10">
+              <img
+                src={post.cover_image_url}
+                alt={post.meta_title}
+                className="w-full rounded-2xl object-cover"
+                style={{ maxHeight: '420px' }}
+              />
+              {post.cover_image_attribution && (
+                <p className="mt-2 text-center text-xs text-slate-400">
+                  {post.cover_image_attribution}
+                </p>
+              )}
+            </div>
+          )}
 
           {/* Markdown body */}
           <div>
