@@ -7,8 +7,12 @@ import remarkGfm from 'remark-gfm'
 import rehypeRaw from 'rehype-raw'
 import Header from '@/components/landing/Header'
 
-function stripFrontmatter(markdown: string): string {
-  return markdown.replace(/^---[\s\S]*?---\n?/, '')
+function prepareMarkdown(markdown: string): string {
+  // Normalise literal \n / \t (double-escaped by the LLM inside JSON strings)
+  // into real newlines before passing to react-markdown.
+  const normalized = markdown.replace(/\\n/g, '\n').replace(/\\t/g, '\t')
+  // Strip YAML frontmatter
+  return normalized.replace(/^---[\s\S]*?---\n?/, '')
 }
 
 type ArticleRow = {
@@ -234,7 +238,7 @@ export default async function ArticlePage({
                 ),
               }}
             >
-              {stripFrontmatter(post.markdown)}
+              {prepareMarkdown(post.markdown)}
             </ReactMarkdown>
           </div>
 
