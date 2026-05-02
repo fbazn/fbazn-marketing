@@ -36,6 +36,19 @@ body {
   }
 }
 
+@keyframes heroBadgePulse {
+  0%,
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+
+  50% {
+    opacity: 0.4;
+    transform: scale(0.7);
+  }
+}
+
 @layer utilities {
   .line-clamp-3 {
     display: -webkit-box;
@@ -93,6 +106,10 @@ body {
     animation: hazardLoop 18s linear infinite;
     will-change: transform;
   }
+
+  .hero-badge-light {
+    animation: heroBadgePulse 2s ease-in-out infinite;
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -102,5 +119,9 @@ body {
 
   .hero-cursor-grid::after {
     transition: none;
+  }
+
+  .hero-badge-light {
+    animation: none;
   }
 }

@@ -300,29 +300,29 @@ export default function LandingPage() {
           onPointerMove={handleHeroPointerMove}
         >
           <div ref={heroGridRef} className="hero-cursor-grid absolute inset-0" aria-hidden="true" />
-          <div className="pointer-events-none absolute right-0 top-0 hidden h-full w-72 flex-col justify-evenly py-20 opacity-20 lg:flex">
-            {[0, 1, 2, 3, 4].map((line) => (
-              <div key={line} className="h-px w-full bg-gradient-to-r from-transparent to-amber-500" />
+          <div className="pointer-events-none absolute right-0 top-0 hidden h-full w-[280px] flex-col justify-evenly py-20 opacity-15 lg:flex">
+            {[0, 1, 2, 3].map((line) => (
+              <div key={line} className="h-0.5 w-full bg-gradient-to-r from-transparent to-amber-500" />
             ))}
-            <div className="absolute bottom-0 right-20 top-0 w-px bg-gradient-to-b from-transparent via-amber-500 to-transparent" />
+            <div className="absolute bottom-0 right-20 top-0 w-[3px] bg-gradient-to-b from-transparent via-amber-500 to-transparent" />
           </div>
 
           <div className="relative max-w-4xl">
             <div className="mb-8 inline-flex items-center gap-3 border border-amber-500/35 px-4 py-2 font-[var(--font-barlow-condensed)] text-xs font-bold uppercase tracking-[0.18em] text-amber-400">
-              <span className="h-1.5 w-1.5 rounded-full bg-amber-400 shadow-[0_0_16px_rgba(245,158,11,0.8)]" />
-              Amazon FBA command centre
+              <span className="hero-badge-light h-1.5 w-1.5 rounded-full bg-amber-400 shadow-[0_0_16px_rgba(245,158,11,0.8)]" />
+              UK-first platform for Amazon FBA sellers
             </div>
-            <h1 className="max-w-3xl font-[var(--font-barlow-condensed)] text-[clamp(4rem,10vw,8rem)] font-black uppercase leading-[0.9] tracking-normal text-white">
-              Source smarter.
-              <span className="block text-indigo-400">Ship faster.</span>
+            <h1 className="max-w-[700px] font-[var(--font-barlow-condensed)] text-[clamp(4rem,9vw,7.5rem)] font-black uppercase leading-[0.92] tracking-normal text-white">
+              Your FBA
+              <span className="block">command</span>
+              <span className="block text-indigo-400">centre.</span>
             </h1>
-            <p className="mt-8 max-w-xl text-lg leading-8 text-[#8b9cc8]">
-              FBAZN helps Amazon sellers move from product browse to confident buying decision
-              with fee-aware profit checks, review queues, supplier records and seller workflows
-              in one place.
+            <p className="mt-7 max-w-[480px] text-lg leading-8 text-[#8b9cc8]">
+              Evaluate products in seconds, track true profit after fees, and manage your entire
+              Amazon operation from one warehouse-grade dashboard.
             </p>
 
-            <form onSubmit={handleHeroSubmit} className="mt-10 flex max-w-xl flex-col sm:flex-row">
+            <form onSubmit={handleHeroSubmit} className="mt-12 flex max-w-[480px] flex-col sm:flex-row">
               <input
                 type="email"
                 value={heroEmail}
@@ -338,11 +338,17 @@ export default function LandingPage() {
               </button>
             </form>
             <p className="mt-3 text-xs uppercase tracking-[0.12em] text-[#4a5a80]">
-              7-day trial. Card entered securely in Stripe checkout.
+              7-day free trial. Secure Stripe checkout. Cancel anytime.
             </p>
 
             <div className="mt-16 flex flex-wrap gap-3">
-              {['UK-first', 'Fee-aware', 'Extension-ready', 'Supplier tracked'].map((tag) => (
+              {[
+                'Product research',
+                'Profit calculator',
+                'Listing optimiser',
+                'PPC management',
+                'Review monitoring',
+              ].map((tag) => (
                 <span
                   key={tag}
                   className="border border-[#1e2d4a] bg-[#141c32]/70 px-4 py-2 font-[var(--font-barlow-condensed)] text-xs font-bold uppercase tracking-[0.14em] text-[#8b9cc8]"
