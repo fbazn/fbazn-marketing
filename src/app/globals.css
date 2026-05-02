@@ -26,6 +26,16 @@ body {
   scroll-behavior: smooth;
 }
 
+@keyframes hazardLoop {
+  from {
+    transform: translateX(0);
+  }
+
+  to {
+    transform: translateX(-50%);
+  }
+}
+
 @layer utilities {
   .line-clamp-3 {
     display: -webkit-box;
@@ -36,5 +46,61 @@ body {
 
   .hover\:line-clamp-none:hover {
     -webkit-line-clamp: unset;
+  }
+}
+
+@layer components {
+  .hero-cursor-grid {
+    --mx: 50%;
+    --my: 45%;
+    pointer-events: none;
+  }
+
+  .hero-cursor-grid::before,
+  .hero-cursor-grid::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+  }
+
+  .hero-cursor-grid::before {
+    background-image:
+      linear-gradient(rgba(245, 158, 11, 0.08) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(245, 158, 11, 0.08) 1px, transparent 1px),
+      radial-gradient(circle at 50% 50%, rgba(245, 158, 11, 0.06), transparent 70%);
+    background-size: 42px 42px, 42px 42px, 100% 100%;
+    opacity: 0.5;
+  }
+
+  .hero-cursor-grid::after {
+    background: radial-gradient(
+      circle at var(--mx) var(--my),
+      rgba(245, 158, 11, 0.36) 0%,
+      rgba(245, 158, 11, 0.16) 12%,
+      rgba(245, 158, 11, 0.06) 24%,
+      transparent 40%
+    );
+    mix-blend-mode: screen;
+    opacity: 0.25;
+    transition: opacity 0.2s ease;
+  }
+
+  .group\/hero:hover .hero-cursor-grid::after {
+    opacity: 0.9;
+  }
+
+  .hazard-divider-track {
+    animation: hazardLoop 18s linear infinite;
+    will-change: transform;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hazard-divider-track {
+    animation: none;
+  }
+
+  .hero-cursor-grid::after {
+    transition: none;
   }
 }

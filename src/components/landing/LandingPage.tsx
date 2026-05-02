@@ -1,7 +1,7 @@
 'use client'
 
-import type { CSSProperties, FormEvent, ReactNode } from 'react'
-import { useMemo, useState } from 'react'
+import type { FormEvent, PointerEvent, ReactNode } from 'react'
+import { useRef, useState } from 'react'
 import Link from 'next/link'
 
 type ActivePlanId = 'starter' | 'pro'
@@ -204,18 +204,9 @@ export default function LandingPage() {
   const [heroEmail, setHeroEmail] = useState('')
   const [ctaEmail, setCtaEmail] = useState('')
   const [modalError, setModalError] = useState(false)
+  const heroGridRef = useRef<HTMLDivElement>(null)
 
   const activeStep = steps[activeStepIndex]
-
-  const heroGridStyle = useMemo(
-    () =>
-      ({
-        backgroundImage:
-          'radial-gradient(circle at 72% 32%, rgba(99,102,241,0.22), transparent 28%), linear-gradient(rgba(99,102,241,0.055) 1px, transparent 1px), linear-gradient(90deg, rgba(99,102,241,0.055) 1px, transparent 1px)',
-        backgroundSize: 'auto, 58px 58px, 58px 58px',
-      }) as CSSProperties,
-    [],
-  )
 
   const openSignup = ({ plan = '', email = '' }: Partial<ModalState> = {}) => {
     setModal({ open: true, plan, email })
@@ -244,6 +235,19 @@ export default function LandingPage() {
       return
     }
     window.location.href = buildSignupUrl(modal.plan, modal.email)
+  }
+
+  const handleHeroPointerMove = (event: PointerEvent<HTMLElement>) => {
+    const heroGrid = heroGridRef.current
+    if (!heroGrid) {
+      return
+    }
+
+    const rect = heroGrid.getBoundingClientRect()
+    const x = ((event.clientX - rect.left) / rect.width) * 100
+    const y = ((event.clientY - rect.top) / rect.height) * 100
+    heroGrid.style.setProperty('--mx', `${Math.max(0, Math.min(100, x))}%`)
+    heroGrid.style.setProperty('--my', `${Math.max(0, Math.min(100, y))}%`)
   }
 
   return (
@@ -290,8 +294,11 @@ export default function LandingPage() {
       </header>
 
       <main className="relative z-10">
-        <section className="relative flex min-h-screen items-center overflow-hidden px-5 pb-16 pt-28 sm:px-8 lg:px-20">
-          <div className="absolute inset-0" style={heroGridStyle} />
+        <section
+          className="group/hero relative flex min-h-screen items-center overflow-hidden px-5 pb-16 pt-28 sm:px-8 lg:px-20"
+          onPointerMove={handleHeroPointerMove}
+        >
+          <div ref={heroGridRef} className="hero-cursor-grid absolute inset-0" aria-hidden="true" />
           <div className="pointer-events-none absolute right-0 top-0 hidden h-full w-72 flex-col justify-evenly py-20 opacity-20 lg:flex">
             {[0, 1, 2, 3, 4].map((line) => (
               <div key={line} className="h-px w-full bg-gradient-to-r from-transparent to-amber-500" />
@@ -735,8 +742,8 @@ function BrowserPreview({ title, children }: { title: string; children: ReactNod
 
 function HazardDivider() {
   return (
-    <div className="relative h-2 overflow-hidden border-y border-amber-500/20 bg-[#070a12]">
-      <div className="absolute inset-0 w-[200%] bg-[repeating-linear-gradient(-45deg,#f59e0b_0,#f59e0b_14px,#1a1a1a_14px,#1a1a1a_28px)] opacity-70" />
+    <div className="relative h-2.5 overflow-hidden border-y border-amber-500/20 bg-[#070a12]" aria-hidden="true">
+      <div className="hazard-divider-track absolute inset-0 w-[200%] bg-[repeating-linear-gradient(-45deg,#f59e0b_0,#f59e0b_14px,#1a1a1a_14px,#1a1a1a_28px)] opacity-70" />
     </div>
   )
 }
