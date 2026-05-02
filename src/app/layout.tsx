@@ -1,5 +1,6 @@
 import './globals.css'
 import type { Metadata } from 'next'
+import { Barlow, Barlow_Condensed } from 'next/font/google'
 
 const siteTitle = 'FBAZN — Amazon FBA Dashboard'
 const siteDescription =
@@ -23,10 +24,22 @@ export const metadata: Metadata = {
   },
 }
 
+const barlow = Barlow({
+  subsets: ['latin'],
+  weight: ['400', '500', '600', '700'],
+  variable: '--font-barlow',
+})
+
+const barlowCondensed = Barlow_Condensed({
+  subsets: ['latin'],
+  weight: ['400', '600', '700', '800', '900'],
+  variable: '--font-barlow-condensed',
+})
+
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en">
-      <body className="min-h-screen bg-white text-slate-900 antialiased">
+    <html lang="en" className={`${barlow.variable} ${barlowCondensed.variable}`}>
+      <body className="min-h-screen bg-[#080c18] text-[#f0f4ff] antialiased">
         {children}
       </body>
     </html>

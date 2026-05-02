@@ -4,9 +4,13 @@ import { createClient } from '@supabase/supabase-js'
 const BASE_URL = 'https://fbazn.com'
 
 function getSupabase() {
+  if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY) {
+    return null
+  }
+
   return createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    process.env.NEXT_PUBLIC_SUPABASE_URL,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
   )
 }
 
@@ -60,7 +64,12 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   ]
 
   // Dynamic blog articles
-  const { data: articles } = await getSupabase()
+  const supabase = getSupabase()
+  if (!supabase) {
+    return staticPages
+  }
+
+  const { data: articles } = await supabase
     .from('blog_articles')
     .select('slug, created_at')
     .order('created_at', { ascending: false })

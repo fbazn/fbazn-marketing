@@ -1,7 +1,6 @@
 // src/app/(site)/components/CTA.tsx
 'use client'
 
-import Link from 'next/link'
 import { motion } from 'framer-motion'
 
 export default function CTA() {

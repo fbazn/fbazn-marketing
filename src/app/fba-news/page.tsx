@@ -2,15 +2,6 @@
 
 import { createClient } from '@/lib/supabase'
 
-type BlogPost = {
-  slug: string
-  title: string
-  content: string
-  link?: string | null
-  published_at?: string | null
-  source?: string | null
-}
-
 export const dynamic = 'force-dynamic'
 
 export default async function BlogPage() {
