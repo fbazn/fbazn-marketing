@@ -23,9 +23,10 @@ const navItems = [
 ]
 
 const stats = [
-  { value: '4x', label: 'Faster product review workflow' },
-  { value: '24/7', label: 'Sourcing pipeline visibility' },
-  { value: '£0', label: 'Guesswork in landed-profit calls' },
+  { value: '12', accent: 'k+', label: 'Active sellers' },
+  { value: '£', accent: '240M', label: 'Revenue tracked monthly' },
+  { value: '4.8', accent: '★', label: 'Average seller rating' },
+  { value: '99', accent: '%', label: 'Platform uptime' },
 ]
 
 const featureCards = [
@@ -355,7 +356,7 @@ export default function LandingPage() {
 
         <HazardDivider />
 
-        <section className="grid border-y border-[#1e2d4a] bg-[#0e1425] px-5 py-12 sm:px-8 md:grid-cols-3 lg:px-20">
+        <section className="grid border-y border-[#1e2d4a] bg-[#0e1425] px-5 py-12 sm:px-8 md:grid-cols-4 lg:px-20">
           {stats.map((stat, index) => (
             <div
               key={stat.label}
@@ -363,6 +364,7 @@ export default function LandingPage() {
             >
               <div className="font-[var(--font-barlow-condensed)] text-6xl font-black leading-none text-white">
                 {stat.value}
+                <span className="text-indigo-400">{stat.accent}</span>
               </div>
               <p className="mt-2 text-xs font-bold uppercase tracking-[0.12em] text-[#8b9cc8]">
                 {stat.label}
