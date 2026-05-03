@@ -53,6 +53,9 @@ export default function Header({ onNavigate }: HeaderProps) {
           <Link href="/blog" className="transition hover:text-amber-200">
             Blog
           </Link>
+          <Link href="/tools" className="transition hover:text-amber-200">
+            Free tools
+          </Link>
         </nav>
         <Link
           href={APP_SIGNUP_URL}

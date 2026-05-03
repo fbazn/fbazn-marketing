@@ -20,12 +20,13 @@ const navItems = [
   { label: 'How it works', href: '#how' },
   { label: 'Pricing', href: '#pricing' },
   { label: 'FAQ', href: '#faq' },
+  { label: 'Free tools', href: '/tools' },
 ]
 
 const stats = [
-  { value: '12', accent: 'k+', label: 'Active sellers' },
-  { value: '£', accent: '240M', label: 'Revenue tracked monthly' },
-  { value: '4.8', accent: '★', label: 'Average seller rating' },
+  { value: '7', accent: '-day', label: 'Free trial on every plan' },
+  { value: 'UK', accent: '-first', label: 'Built for Amazon.co.uk sellers' },
+  { value: '100', accent: '%', label: 'Stripe-secured checkout' },
   { value: '99', accent: '%', label: 'Platform uptime' },
 ]
 
@@ -59,18 +60,18 @@ const featureCards = [
     media: 'Historical data preview',
   },
   {
-    id: 'alerts',
-    title: 'Seller Alerts',
+    id: 'sourcing',
+    title: 'Sourcing List',
     description:
-      'Keep important sourcing signals visible, from product changes to lead follow-ups and review queue movement.',
-    media: 'Alert center preview',
+      'Approve winners from your review queue and build an organised buying list. Track status and costs across your entire active sourcing pipeline.',
+    media: 'Sourcing list preview',
   },
   {
-    id: 'competitors',
-    title: 'Competitor Tracking',
+    id: 'archived',
+    title: 'Archived Products',
     description:
-      'Watch pricing, BSR movement and competitor stock signals so you know when to act, hold back, or reorder.',
-    media: 'Competitor tracking preview',
+      'Keep your pipeline clean without losing history. Archive products that don\'t work out and restore them instantly when conditions change.',
+    media: 'Archived products preview',
   },
 ]
 
@@ -343,11 +344,11 @@ export default function LandingPage() {
 
             <div className="mt-16 flex flex-wrap gap-3">
               {[
-                'Product research',
-                'Profit calculator',
-                'Listing optimiser',
-                'PPC management',
-                'Review monitoring',
+                'Chrome Extension',
+                'Review Queue',
+                'Profit Calculator',
+                'Supplier Records',
+                'Sourcing List',
               ].map((tag) => (
                 <span
                   key={tag}
@@ -598,6 +599,12 @@ export default function LandingPage() {
             className="text-xs font-bold uppercase tracking-[0.14em] text-[#4a5a80] transition hover:text-white"
           >
             Blog
+          </Link>
+          <Link
+            href="/tools"
+            className="text-xs font-bold uppercase tracking-[0.14em] text-[#4a5a80] transition hover:text-white"
+          >
+            Free tools
           </Link>
           <Link
             href="/privacy"
