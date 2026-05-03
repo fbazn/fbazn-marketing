@@ -36,67 +36,67 @@ const featureCards = [
     title: 'Profit Calculator',
     description:
       'See landed cost, referral fees, FBA fees, VAT, net profit, ROI and margin in one clean view before adding a product to your review queue.',
-    media: 'Profit calculator module preview',
+    media: '/screenshots/profit-calculator.png',
   },
   {
     id: 'queue',
     title: 'Review Queue',
     description:
       'Save ASINs from Amazon, review the numbers later, and keep weak leads out of your buying list before they waste time.',
-    media: 'Review queue workflow preview',
+    media: '/screenshots/review-queue.png',
   },
   {
     id: 'suppliers',
     title: 'Supplier Records',
     description:
       'Attach supplier details, costs, lead times, notes and reorder context directly to each product opportunity.',
-    media: 'Supplier management preview',
+    media: '/screenshots/suppliers.png',
   },
   {
     id: 'history',
     title: 'Product History',
     description:
       'Track product notes, decisions and performance context so the same opportunity never gets evaluated from zero twice.',
-    media: 'Historical data preview',
+    media: '/screenshots/sourcing-detail.png',
   },
   {
     id: 'sourcing',
     title: 'Sourcing List',
     description:
       'Approve winners from your review queue and build an organised buying list. Track status and costs across your entire active sourcing pipeline.',
-    media: 'Sourcing list preview',
+    media: '/screenshots/sourcing-list.png',
   },
   {
     id: 'archived',
     title: 'Archived Products',
     description:
       'Keep your pipeline clean without losing history. Archive products that don\'t work out and restore them instantly when conditions change.',
-    media: 'Archived products preview',
+    media: '/screenshots/archived.png',
   },
 ]
 
 const steps = [
   {
     title: 'Install the extension',
-    media: 'Chrome extension install preview',
+    media: '/screenshots/amazon-extension.png',
     description:
       'Add the FBAZN browser extension and it works quietly as you browse Amazon, with no tab-switching or manual data entry.',
   },
   {
     title: 'Add to review queue',
-    media: 'Save ASIN to review queue preview',
+    media: '/screenshots/review-queue-detail.png',
     description:
       'Spot a potential product and send it to FBAZN. Fees, BSR notes, competition data and estimated profit move into your queue.',
   },
   {
     title: 'Build your sourcing list',
-    media: 'Review queue to sourcing list preview',
+    media: '/screenshots/sourcing-list.png',
     description:
       'Approve winners, reject weak leads and keep your sourcing list scored, organised and ready to act on.',
   },
   {
     title: 'Log your supplier',
-    media: 'Supplier details screen preview',
+    media: '/screenshots/suppliers.png',
     description:
       'Add supplier details, costs, lead times and notes against each product so reordering is simple when it is time to buy.',
   },
@@ -420,9 +420,11 @@ export default function LandingPage() {
               </p>
             </div>
             <BrowserPreview title="app.fbazn.com / module preview">
-              <div className="flex h-full min-h-72 items-center justify-center border border-dashed border-indigo-400/25 bg-[#080c18] p-6 text-center font-[var(--font-barlow-condensed)] text-2xl font-black uppercase tracking-[0.08em] text-[#8b9cc8]">
-                {activeFeature.media}
-              </div>
+              <img
+                src={activeFeature.media}
+                alt={activeFeature.title}
+                className="h-full w-full object-cover object-top"
+              />
             </BrowserPreview>
           </div>
         </section>
@@ -455,9 +457,11 @@ export default function LandingPage() {
           <div className="mt-12">
             <BrowserPreview title="fbazn workflow preview">
               <div className="grid min-h-80 gap-8 bg-[#080c18] p-6 lg:grid-cols-[1.1fr_0.9fr]">
-                <div className="flex min-h-64 items-center justify-center border border-dashed border-amber-400/25 bg-[#0e1425] p-6 text-center font-[var(--font-barlow-condensed)] text-2xl font-black uppercase tracking-[0.08em] text-[#8b9cc8]">
-                  {activeStep.media}
-                </div>
+                <img
+                  src={activeStep.media}
+                  alt={activeStep.title}
+                  className="w-full object-cover object-top"
+                />
                 <div className="flex flex-col justify-center">
                   <p className="font-[var(--font-barlow-condensed)] text-xs font-bold uppercase tracking-[0.18em] text-amber-400">
                     Step {String(activeStepIndex + 1).padStart(2, '0')}
