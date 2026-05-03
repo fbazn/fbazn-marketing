@@ -1,3 +1,7 @@
+'use client'
+
+import { useState } from 'react'
+
 const tiers = [
   {
     name: 'Starter',
@@ -13,7 +17,6 @@ const tiers = [
     period: '/mo',
     description: 'Deeper data and inventory tracking for serious sellers.',
     features: ['Everything in Starter', 'Inventory import & dashboard', 'Inbound order tracking', 'Invoice OCR & confirmation', 'Up to 1,000 products'],
-    cta: { label: 'Register interest', href: 'mailto:hello@fbazn.com?subject=Pro%20plan%20interest' },
     highlight: true,
     comingSoon: true,
   },
@@ -23,10 +26,60 @@ const tiers = [
     period: '/mo',
     description: 'Maximum power for high-volume sellers and small teams.',
     features: ['Everything in Pro', 'Unlimited products', 'Team seats (up to 5 users)', 'Automated lead generation', 'Priority support'],
-    cta: { label: 'Coming soon', href: 'mailto:hello@fbazn.com' },
     comingSoon: true,
   },
 ]
+
+function EmailCapture({ plan }: { plan: string }) {
+  const [email, setEmail] = useState('')
+  const [state, setState] = useState<'idle' | 'loading' | 'done' | 'error'>('idle')
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    setState('loading')
+    try {
+      const res = await fetch('/api/waitlist', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, plan: plan.toLowerCase() }),
+      })
+      setState(res.ok ? 'done' : 'error')
+    } catch {
+      setState('error')
+    }
+  }
+
+  if (state === 'done') {
+    return (
+      <p className="text-center text-sm font-medium text-teal-600">
+        You&apos;re on the list — we&apos;ll let you know when {plan} launches.
+      </p>
+    )
+  }
+
+  return (
+    <form onSubmit={handleSubmit} className="flex flex-col gap-2">
+      <input
+        type="email"
+        required
+        value={email}
+        onChange={(e) => setEmail(e.target.value)}
+        placeholder="your@email.com"
+        className="w-full rounded-full border border-slate-200 px-4 py-2 text-sm text-slate-900 placeholder:text-slate-400 focus:border-slate-400 focus:outline-none"
+      />
+      <button
+        type="submit"
+        disabled={state === 'loading'}
+        className="inline-flex w-full items-center justify-center rounded-full border border-slate-300 px-4 py-2 text-sm font-semibold text-slate-700 transition hover:border-slate-400 hover:text-slate-900 disabled:opacity-50"
+      >
+        {state === 'loading' ? 'Saving…' : 'Notify me when it launches'}
+      </button>
+      {state === 'error' && (
+        <p className="text-center text-xs text-rose-500">Something went wrong — try again.</p>
+      )}
+    </form>
+  )
+}
 
 export default function Pricing() {
   return (
@@ -53,8 +106,8 @@ export default function Pricing() {
                 }`}
               >
                 {tier.highlight && (
-                  <span className={`absolute -top-3 left-6 rounded-full px-3 py-1 text-xs font-semibold uppercase tracking-wider text-white ${tier.comingSoon ? 'bg-teal-600' : 'bg-slate-900'}`}>
-                    {tier.comingSoon ? 'Coming soon' : 'Most popular'}
+                  <span className="absolute -top-3 left-6 rounded-full bg-teal-600 px-3 py-1 text-xs font-semibold uppercase tracking-wider text-white">
+                    Coming soon
                   </span>
                 )}
                 <div>
@@ -66,7 +119,7 @@ export default function Pricing() {
                   </div>
                   {tier.comingSoon && (
                     <p className="mt-2 text-xs font-semibold uppercase tracking-[0.2em] text-teal-600">
-                      Coming later
+                      Coming soon
                     </p>
                   )}
                   <ul className="mt-6 space-y-3 text-sm text-slate-600">
@@ -80,18 +133,13 @@ export default function Pricing() {
                 </div>
                 <div className="mt-8">
                   {tier.comingSoon ? (
-                    <a
-                      href={tier.cta.href}
-                      className="inline-flex w-full items-center justify-center rounded-full border border-slate-300 px-4 py-2 text-sm font-semibold text-slate-700 transition hover:border-slate-400 hover:text-slate-900"
-                    >
-                      {tier.cta.label}
-                    </a>
+                    <EmailCapture plan={tier.name} />
                   ) : (
                     <a
-                      href={tier.cta.href}
+                      href={tier.cta!.href}
                       className="inline-flex w-full items-center justify-center rounded-full bg-slate-900 px-4 py-2 text-sm font-semibold text-white transition hover:bg-slate-800"
                     >
-                      {tier.cta.label}
+                      {tier.cta!.label}
                     </a>
                   )}
                 </div>
