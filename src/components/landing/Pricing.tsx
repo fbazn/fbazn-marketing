@@ -13,8 +13,9 @@ const tiers = [
     period: '/mo',
     description: 'Deeper data and inventory tracking for serious sellers.',
     features: ['Everything in Starter', 'Inventory import & dashboard', 'Inbound order tracking', 'Invoice OCR & confirmation', 'Up to 1,000 products'],
-    cta: { label: 'Start free trial', href: 'https://app.fbazn.com/login?mode=signup' },
+    cta: { label: 'Register interest', href: 'mailto:hello@fbazn.com?subject=Pro%20plan%20interest' },
     highlight: true,
+    comingSoon: true,
   },
   {
     name: 'Business',
@@ -52,8 +53,8 @@ export default function Pricing() {
                 }`}
               >
                 {tier.highlight && (
-                  <span className="absolute -top-3 left-6 rounded-full bg-slate-900 px-3 py-1 text-xs font-semibold uppercase tracking-wider text-white">
-                    Most popular
+                  <span className={`absolute -top-3 left-6 rounded-full px-3 py-1 text-xs font-semibold uppercase tracking-wider text-white ${tier.comingSoon ? 'bg-teal-600' : 'bg-slate-900'}`}>
+                    {tier.comingSoon ? 'Coming soon' : 'Most popular'}
                   </span>
                 )}
                 <div>
