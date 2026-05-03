@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState, useCallback } from 'react'
+import { useState, useCallback, useEffect } from 'react'
 import { createClient } from '@/lib/supabase-browser'
 import ToolShell, { ToolCard, ToolRow, ToolStatCard, ToolDivider, inputWithPrefixCls, inputCls, labelCls, prefixCls } from '@/components/tools/ToolShell'
 
@@ -18,21 +18,19 @@ interface FulfillmentFee {
 }
 
 interface Results {
+  referralFeePct: number
   referralFee: number
   fulfillmentFee: number
   totalFees: number
-  netProfit: number
-  roi: number
-  margin: number
+  feesAsPct: number
 }
 
-export default function FbaCalculatorPage() {
+export default function FbaFeeCalculatorPage() {
   const [referralFees, setReferralFees] = useState<ReferralFee[]>([])
   const [fulfillmentFees, setFulfillmentFees] = useState<FulfillmentFee[]>([])
   const [loading, setLoading] = useState(true)
 
-  const [buyBoxPrice, setBuyBoxPrice] = useState('')
-  const [supplierCost, setSupplierCost] = useState('')
+  const [sellingPrice, setSellingPrice] = useState('')
   const [selectedCategory, setSelectedCategory] = useState('')
   const [selectedSizeTier, setSelectedSizeTier] = useState('')
 
@@ -51,9 +49,8 @@ export default function FbaCalculatorPage() {
   }, [])
 
   const calculate = useCallback(() => {
-    const price = parseFloat(buyBoxPrice)
-    const cost = parseFloat(supplierCost)
-    if (!price || !cost || !selectedCategory || !selectedSizeTier) return
+    const price = parseFloat(sellingPrice)
+    if (!price || !selectedCategory || !selectedSizeTier) return
 
     const referralRow = referralFees.find((r) => r.category === selectedCategory)
     const fulfillmentRow = fulfillmentFees.find((f) => f.size_tier === selectedSizeTier)
@@ -62,41 +59,29 @@ export default function FbaCalculatorPage() {
     const referralFee = Math.max((price * referralRow.referral_fee_pct) / 100, referralRow.min_referral_fee)
     const fulfillmentFee = fulfillmentRow.fee
     const totalFees = referralFee + fulfillmentFee
-    const netProfit = price - cost - totalFees
-    const roi = cost > 0 ? (netProfit / cost) * 100 : 0
-    const margin = price > 0 ? (netProfit / price) * 100 : 0
+    const feesAsPct = price > 0 ? (totalFees / price) * 100 : 0
 
-    setResults({ referralFee, fulfillmentFee, totalFees, netProfit, roi, margin })
-  }, [buyBoxPrice, supplierCost, selectedCategory, selectedSizeTier, referralFees, fulfillmentFees])
+    setResults({ referralFeePct: referralRow.referral_fee_pct, referralFee, fulfillmentFee, totalFees, feesAsPct })
+  }, [sellingPrice, selectedCategory, selectedSizeTier, referralFees, fulfillmentFees])
 
   useEffect(() => { calculate() }, [calculate])
 
   const fmt = (n: number) => n.toLocaleString('en-GB', { style: 'currency', currency: 'GBP', minimumFractionDigits: 2 })
   const pct = (n: number) => `${n.toFixed(1)}%`
 
-  const profitColor = results === null ? '' : results.netProfit > 0 ? 'text-emerald-400' : 'text-rose-400'
-
   return (
-    <ToolShell title="FBA Profit Calculator" description="UK marketplace · Fees sourced from Amazon's 2025 schedule">
+    <ToolShell title="Amazon FBA Fee Calculator" description="UK marketplace · See exactly what Amazon charges before you commit">
       {loading ? (
         <p className="text-center text-sm text-[#8b9cc8]">Loading fee data…</p>
       ) : (
         <>
           <ToolCard heading="Product Details">
             <div className="grid gap-4 sm:grid-cols-2">
-              <label className={labelCls}>
-                Buy Box Price (£)
+              <label className={`${labelCls} sm:col-span-2`}>
+                Selling Price (£)
                 <div className="relative">
                   <span className={prefixCls}>£</span>
-                  <input type="number" min="0" step="0.01" value={buyBoxPrice} onChange={(e) => setBuyBoxPrice(e.target.value)} placeholder="0.00" className={inputWithPrefixCls} />
-                </div>
-              </label>
-
-              <label className={labelCls}>
-                Supplier Cost (£)
-                <div className="relative">
-                  <span className={prefixCls}>£</span>
-                  <input type="number" min="0" step="0.01" value={supplierCost} onChange={(e) => setSupplierCost(e.target.value)} placeholder="0.00" className={inputWithPrefixCls} />
+                  <input type="number" min="0" step="0.01" value={sellingPrice} onChange={(e) => setSellingPrice(e.target.value)} placeholder="0.00" className={inputWithPrefixCls} />
                 </div>
               </label>
 
@@ -126,17 +111,14 @@ export default function FbaCalculatorPage() {
           </ToolCard>
 
           {results && (
-            <ToolCard heading="Breakdown">
-              <ToolRow label="Buy Box Price" value={fmt(parseFloat(buyBoxPrice))} />
-              <ToolRow label="Supplier Cost" value={`− ${fmt(parseFloat(supplierCost))}`} muted />
-              <ToolRow label={`Referral Fee (${referralFees.find((r) => r.category === selectedCategory)?.referral_fee_pct}%)`} value={`− ${fmt(results.referralFee)}`} muted />
-              <ToolRow label="FBA Fulfilment Fee" value={`− ${fmt(results.fulfillmentFee)}`} muted />
+            <ToolCard heading="Fee Breakdown">
+              <ToolRow label="Referral Fee Rate" value={pct(results.referralFeePct)} />
+              <ToolRow label="Referral Fee (£)" value={fmt(results.referralFee)} />
+              <ToolRow label="FBA Fulfilment Fee" value={fmt(results.fulfillmentFee)} />
               <ToolDivider />
-              <ToolRow label="Total Fees" value={fmt(results.totalFees)} />
-              <div className="mt-4 grid grid-cols-3 gap-3">
-                <ToolStatCard label="Net Profit" value={fmt(results.netProfit)} colorClass={profitColor} />
-                <ToolStatCard label="ROI" value={pct(results.roi)} colorClass={results.roi >= 30 ? 'text-emerald-400' : results.roi >= 0 ? 'text-amber-400' : 'text-rose-400'} />
-                <ToolStatCard label="Margin" value={pct(results.margin)} colorClass={results.margin >= 20 ? 'text-emerald-400' : results.margin >= 0 ? 'text-amber-400' : 'text-rose-400'} />
+              <div className="grid grid-cols-2 gap-3">
+                <ToolStatCard label="Total Amazon Fees" value={fmt(results.totalFees)} colorClass="text-white" />
+                <ToolStatCard label="Fees as % of Price" value={pct(results.feesAsPct)} colorClass={results.feesAsPct <= 20 ? 'text-emerald-400' : results.feesAsPct <= 35 ? 'text-amber-400' : 'text-rose-400'} />
               </div>
             </ToolCard>
           )}

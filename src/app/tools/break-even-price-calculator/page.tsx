@@ -1,8 +1,8 @@
 'use client'
 
-import { useEffect, useState, useCallback } from 'react'
+import { useState, useCallback, useEffect } from 'react'
 import { createClient } from '@/lib/supabase-browser'
-import ToolShell, { ToolCard, ToolRow, ToolStatCard, ToolDivider, inputWithPrefixCls, inputCls, labelCls, prefixCls } from '@/components/tools/ToolShell'
+import ToolShell, { ToolCard, ToolRow, ToolStatCard, ToolDivider, inputWithPrefixCls, inputCls, labelCls, prefixCls, suffixCls } from '@/components/tools/ToolShell'
 
 interface ReferralFee {
   category: string
@@ -18,23 +18,21 @@ interface FulfillmentFee {
 }
 
 interface Results {
-  referralFee: number
-  fulfillmentFee: number
-  totalFees: number
-  netProfit: number
-  roi: number
-  margin: number
+  breakEvenPrice: number
+  targetPrice: number
+  buyBoxHeadroom: number | null
 }
 
-export default function FbaCalculatorPage() {
+export default function BreakEvenPriceCalculatorPage() {
   const [referralFees, setReferralFees] = useState<ReferralFee[]>([])
   const [fulfillmentFees, setFulfillmentFees] = useState<FulfillmentFee[]>([])
   const [loading, setLoading] = useState(true)
 
-  const [buyBoxPrice, setBuyBoxPrice] = useState('')
   const [supplierCost, setSupplierCost] = useState('')
   const [selectedCategory, setSelectedCategory] = useState('')
   const [selectedSizeTier, setSelectedSizeTier] = useState('')
+  const [targetRoi, setTargetRoi] = useState('30')
+  const [buyBoxPrice, setBuyBoxPrice] = useState('')
 
   const [results, setResults] = useState<Results | null>(null)
 
@@ -51,33 +49,32 @@ export default function FbaCalculatorPage() {
   }, [])
 
   const calculate = useCallback(() => {
-    const price = parseFloat(buyBoxPrice)
     const cost = parseFloat(supplierCost)
-    if (!price || !cost || !selectedCategory || !selectedSizeTier) return
+    const roi = parseFloat(targetRoi) || 0
+    if (!cost || !selectedCategory || !selectedSizeTier) return
 
     const referralRow = referralFees.find((r) => r.category === selectedCategory)
     const fulfillmentRow = fulfillmentFees.find((f) => f.size_tier === selectedSizeTier)
     if (!referralRow || !fulfillmentRow) return
 
-    const referralFee = Math.max((price * referralRow.referral_fee_pct) / 100, referralRow.min_referral_fee)
-    const fulfillmentFee = fulfillmentRow.fee
-    const totalFees = referralFee + fulfillmentFee
-    const netProfit = price - cost - totalFees
-    const roi = cost > 0 ? (netProfit / cost) * 100 : 0
-    const margin = price > 0 ? (netProfit / price) * 100 : 0
+    const refPct = referralRow.referral_fee_pct / 100
+    const fulfil = fulfillmentRow.fee
+    const breakEvenPrice = (cost + fulfil) / (1 - refPct)
+    const targetPrice = (cost + fulfil + cost * (roi / 100)) / (1 - refPct)
 
-    setResults({ referralFee, fulfillmentFee, totalFees, netProfit, roi, margin })
-  }, [buyBoxPrice, supplierCost, selectedCategory, selectedSizeTier, referralFees, fulfillmentFees])
+    let buyBoxHeadroom: number | null = null
+    const bbp = parseFloat(buyBoxPrice)
+    if (bbp) buyBoxHeadroom = bbp - targetPrice
+
+    setResults({ breakEvenPrice, targetPrice, buyBoxHeadroom })
+  }, [supplierCost, selectedCategory, selectedSizeTier, targetRoi, buyBoxPrice, referralFees, fulfillmentFees])
 
   useEffect(() => { calculate() }, [calculate])
 
   const fmt = (n: number) => n.toLocaleString('en-GB', { style: 'currency', currency: 'GBP', minimumFractionDigits: 2 })
-  const pct = (n: number) => `${n.toFixed(1)}%`
-
-  const profitColor = results === null ? '' : results.netProfit > 0 ? 'text-emerald-400' : 'text-rose-400'
 
   return (
-    <ToolShell title="FBA Profit Calculator" description="UK marketplace · Fees sourced from Amazon's 2025 schedule">
+    <ToolShell title="Amazon FBA Break-Even Price Calculator" description="UK marketplace · Find your minimum viable selling price">
       {loading ? (
         <p className="text-center text-sm text-[#8b9cc8]">Loading fee data…</p>
       ) : (
@@ -85,18 +82,18 @@ export default function FbaCalculatorPage() {
           <ToolCard heading="Product Details">
             <div className="grid gap-4 sm:grid-cols-2">
               <label className={labelCls}>
-                Buy Box Price (£)
-                <div className="relative">
-                  <span className={prefixCls}>£</span>
-                  <input type="number" min="0" step="0.01" value={buyBoxPrice} onChange={(e) => setBuyBoxPrice(e.target.value)} placeholder="0.00" className={inputWithPrefixCls} />
-                </div>
-              </label>
-
-              <label className={labelCls}>
                 Supplier Cost (£)
                 <div className="relative">
                   <span className={prefixCls}>£</span>
                   <input type="number" min="0" step="0.01" value={supplierCost} onChange={(e) => setSupplierCost(e.target.value)} placeholder="0.00" className={inputWithPrefixCls} />
+                </div>
+              </label>
+
+              <label className={labelCls}>
+                Target ROI (%)
+                <div className="relative">
+                  <input type="number" min="0" step="1" value={targetRoi} onChange={(e) => setTargetRoi(e.target.value)} placeholder="30" className={`${inputCls} pr-8`} />
+                  <span className={suffixCls}>%</span>
                 </div>
               </label>
 
@@ -122,22 +119,37 @@ export default function FbaCalculatorPage() {
                   <p className="text-xs text-[#8b9cc8]">{fulfillmentFees.find((f) => f.size_tier === selectedSizeTier)?.description}</p>
                 )}
               </label>
+
+              <label className={`${labelCls} sm:col-span-2`}>
+                Buy Box Price (£) — optional
+                <div className="relative">
+                  <span className={prefixCls}>£</span>
+                  <input type="number" min="0" step="0.01" value={buyBoxPrice} onChange={(e) => setBuyBoxPrice(e.target.value)} placeholder="0.00" className={inputWithPrefixCls} />
+                </div>
+              </label>
             </div>
           </ToolCard>
 
           {results && (
-            <ToolCard heading="Breakdown">
-              <ToolRow label="Buy Box Price" value={fmt(parseFloat(buyBoxPrice))} />
-              <ToolRow label="Supplier Cost" value={`− ${fmt(parseFloat(supplierCost))}`} muted />
-              <ToolRow label={`Referral Fee (${referralFees.find((r) => r.category === selectedCategory)?.referral_fee_pct}%)`} value={`− ${fmt(results.referralFee)}`} muted />
-              <ToolRow label="FBA Fulfilment Fee" value={`− ${fmt(results.fulfillmentFee)}`} muted />
-              <ToolDivider />
-              <ToolRow label="Total Fees" value={fmt(results.totalFees)} />
-              <div className="mt-4 grid grid-cols-3 gap-3">
-                <ToolStatCard label="Net Profit" value={fmt(results.netProfit)} colorClass={profitColor} />
-                <ToolStatCard label="ROI" value={pct(results.roi)} colorClass={results.roi >= 30 ? 'text-emerald-400' : results.roi >= 0 ? 'text-amber-400' : 'text-rose-400'} />
-                <ToolStatCard label="Margin" value={pct(results.margin)} colorClass={results.margin >= 20 ? 'text-emerald-400' : results.margin >= 0 ? 'text-amber-400' : 'text-rose-400'} />
+            <ToolCard heading="Pricing Analysis">
+              <div className="grid grid-cols-2 gap-3">
+                <ToolStatCard label="Break-Even Price" value={fmt(results.breakEvenPrice)} colorClass="text-white" />
+                <ToolStatCard label={`Price for ${targetRoi}% ROI`} value={fmt(results.targetPrice)} colorClass="text-indigo-400" />
               </div>
+              {results.buyBoxHeadroom !== null && (
+                <>
+                  <ToolDivider />
+                  <ToolRow
+                    label="Headroom vs Buy Box"
+                    value={results.buyBoxHeadroom >= 0 ? `+${fmt(results.buyBoxHeadroom)}` : fmt(results.buyBoxHeadroom)}
+                  />
+                  <p className="mt-2 text-xs text-[#8b9cc8]">
+                    {results.buyBoxHeadroom >= 0
+                      ? 'The buy box price supports your target ROI.'
+                      : 'The buy box price is below your target price — this product may not be viable at your ROI target.'}
+                  </p>
+                </>
+              )}
             </ToolCard>
           )}
 
