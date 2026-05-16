@@ -140,6 +140,10 @@ export default function AffiliateRegisterPage() {
     done: "You're in.",
   }
 
+  const doneMessage = step === 'done'
+    ? (linkPassword ? 'Accounts linked. Redirecting to your dashboard…' : 'Account created. Redirecting to your dashboard…')
+    : ''
+
   const stepSubtitle: Record<Step, string> = {
     account: 'Create your affiliate account.',
     code: 'Choose your referral code — this is what goes in your link.',
@@ -362,7 +366,7 @@ export default function AffiliateRegisterPage() {
               <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-emerald-500/15 border border-emerald-500/30">
                 <span className="text-2xl">✓</span>
               </div>
-              <p className="text-sm text-[#8b9cc8]">Account linked. Redirecting to your dashboard…</p>
+              <p className="text-sm text-[#8b9cc8]">{doneMessage}</p>
             </div>
           )}
         </div>
