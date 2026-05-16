@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { Suspense, useEffect, useState } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { createClient } from '@/lib/supabase-browser'
 import { getEffectiveRate } from '@/lib/affiliate'
@@ -63,7 +63,7 @@ function fmtMonth(dateStr: string) {
   return new Date(dateStr).toLocaleDateString('en-GB', { month: 'short', year: 'numeric' })
 }
 
-export default function AffiliateDashboard() {
+function AffiliateDashboardContent() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const [stats, setStats] = useState<Stats | null>(null)
@@ -385,5 +385,17 @@ export default function AffiliateDashboard() {
         )}
       </main>
     </div>
+  )
+}
+
+export default function AffiliateDashboard() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen bg-[#080c18] flex items-center justify-center">
+        <div className="text-sm text-[#4a5a80]">Loading dashboard…</div>
+      </div>
+    }>
+      <AffiliateDashboardContent />
+    </Suspense>
   )
 }
