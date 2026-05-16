@@ -1,9 +1,11 @@
 'use client'
 
-import { Suspense, useEffect, useState } from 'react'
+import { Suspense, useEffect, useState, useCallback } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { createClient } from '@/lib/supabase-browser'
 import { getEffectiveRate } from '@/lib/affiliate'
+import { loadConnectAndInitialize, StripeConnectInstance } from '@stripe/connect-js'
+import { ConnectComponentsProvider, ConnectAccountManagement } from '@stripe/react-connect-js'
 
 type Stats = {
   affiliate: {
@@ -69,6 +71,9 @@ function AffiliateDashboardContent() {
   const [stats, setStats] = useState<Stats | null>(null)
   const [loading, setLoading] = useState(true)
   const [connectLoading, setConnectLoading] = useState(false)
+  const [manageLoading, setManageLoading] = useState(false)
+  const [manageOpen, setManageOpen] = useState(false)
+  const [stripeConnect, setStripeConnect] = useState<StripeConnectInstance | null>(null)
   const [tab, setTab] = useState<'referrals' | 'commissions' | 'payouts'>('referrals')
 
   const connectReturn = searchParams.get('connect')
@@ -106,6 +111,39 @@ function AffiliateDashboardContent() {
     }
     window.location.href = url
   }
+
+  const handleManageStripe = useCallback(async () => {
+    setManageLoading(true)
+    try {
+      const instance = loadConnectAndInitialize({
+        publishableKey: process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY!,
+        fetchClientSecret: async () => {
+          const res = await fetch('/api/affiliate/manage-connect', { method: 'POST' })
+          const { clientSecret, error } = await res.json()
+          if (error) throw new Error(error)
+          return clientSecret
+        },
+        appearance: {
+          overlays: 'dialog',
+          variables: {
+            colorBackground: '#0e1425',
+            colorText: '#f0f4ff',
+            colorSecondaryText: '#8b9cc8',
+            colorPrimary: '#f59e0b',
+            colorBorder: '#1e2d4a',
+            borderRadius: '6px',
+            fontFamily: 'Barlow, ui-sans-serif, system-ui, sans-serif',
+          },
+        },
+      })
+      setStripeConnect(instance)
+      setManageOpen(true)
+    } catch (err) {
+      alert(`Error: ${err instanceof Error ? err.message : 'Unknown error'}`)
+    } finally {
+      setManageLoading(false)
+    }
+  }, [])
 
   async function handleSignOut() {
     const supabase = createClient()
@@ -172,8 +210,8 @@ function AffiliateDashboardContent() {
       </header>
 
       <main className="mx-auto max-w-6xl px-5 py-8">
-        {/* Stripe Connect alert */}
-        {!affiliate.stripe_connect_onboarded && (
+        {/* Stripe Connect banner */}
+        {!affiliate.stripe_connect_onboarded && connectReturn !== 'success' && (
           <div className="mb-6 flex items-center justify-between gap-4 rounded border border-amber-500/30 bg-amber-500/8 px-4 py-3">
             <div>
               <p className="text-sm font-semibold text-amber-300">Connect your bank account to receive payouts</p>
@@ -194,9 +232,25 @@ function AffiliateDashboardContent() {
           </div>
         )}
 
-        {connectReturn === 'success' && (
-          <div className="mb-6 rounded border border-emerald-500/30 bg-emerald-500/10 px-4 py-3 text-sm text-emerald-300">
-            Stripe Connect set up successfully. You're ready to receive payouts.
+        {(affiliate.stripe_connect_onboarded || connectReturn === 'success') && (
+          <div className="mb-6 flex items-center justify-between gap-4 rounded border border-emerald-500/30 bg-emerald-500/8 px-4 py-3">
+            <div className="flex items-center gap-2">
+              <svg className="h-4 w-4 shrink-0 text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+              </svg>
+              <div>
+                <p className="text-sm font-semibold text-emerald-300">Payout account connected</p>
+                <p className="text-xs text-emerald-500/70 mt-0.5">Manage your bank details, identity, and payout settings via Stripe.</p>
+              </div>
+            </div>
+            <button
+              onClick={handleManageStripe}
+              disabled={manageLoading}
+              className="shrink-0 px-4 py-2 text-xs font-extrabold uppercase tracking-[0.1em] text-[#8b9cc8] border border-[#1e2d4a] rounded hover:border-emerald-500/50 hover:text-white disabled:opacity-60 transition"
+              style={{ fontFamily: 'var(--font-barlow-condensed)' }}
+            >
+              {manageLoading ? 'Opening…' : 'Manage account'}
+            </button>
           </div>
         )}
 
@@ -388,6 +442,43 @@ function AffiliateDashboardContent() {
           </div>
         )}
       </main>
+
+      {/* Manage payout account modal */}
+      {manageOpen && stripeConnect && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+          {/* Backdrop */}
+          <div
+            className="absolute inset-0 bg-black/70 backdrop-blur-sm"
+            onClick={() => setManageOpen(false)}
+          />
+          {/* Modal */}
+          <div className="relative w-full max-w-2xl max-h-[85vh] overflow-y-auto rounded-lg border border-[#1e2d4a] bg-[#0e1425] shadow-2xl">
+            {/* Header */}
+            <div className="flex items-center justify-between border-b border-[#1e2d4a] px-5 py-4">
+              <div>
+                <h2 className="text-sm font-bold uppercase tracking-[0.12em] text-[#f0f4ff]" style={{ fontFamily: 'var(--font-barlow-condensed)' }}>
+                  Payout account
+                </h2>
+                <p className="mt-0.5 text-xs text-[#4a5a80]">Manage your bank details and identity verification</p>
+              </div>
+              <button
+                onClick={() => setManageOpen(false)}
+                className="flex h-8 w-8 items-center justify-center rounded text-[#4a5a80] hover:text-white transition"
+              >
+                <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+            {/* Stripe embedded component */}
+            <div className="p-5">
+              <ConnectComponentsProvider connectInstance={stripeConnect}>
+                <ConnectAccountManagement />
+              </ConnectComponentsProvider>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }
