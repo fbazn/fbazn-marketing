@@ -1,13 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createAdminClient } from '@/lib/supabase-admin'
-import { createClient } from '@/lib/supabase-browser'
+import { createRouteClient } from '@/lib/supabase-server'
 import Stripe from 'stripe'
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!)
 
 export async function POST(request: NextRequest) {
-  const browserClient = createClient()
-  const { data: { user } } = await browserClient.auth.getUser()
+  const supabaseAuth = await createRouteClient()
+  const { data: { user } } = await supabaseAuth.auth.getUser()
 
   if (!user) {
     return NextResponse.json({ error: 'Unauthorised' }, { status: 401 })

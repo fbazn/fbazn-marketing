@@ -1,10 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createAdminClient } from '@/lib/supabase-admin'
-import { createClient } from '@/lib/supabase-browser'
+import { createRouteClient } from '@/lib/supabase-server'
 
 export async function GET(_request: NextRequest) {
-  const browserClient = createClient()
-  const { data: { user } } = await browserClient.auth.getUser()
+  const supabaseAuth = await createRouteClient()
+  const { data: { user } } = await supabaseAuth.auth.getUser()
 
   if (!user) {
     return NextResponse.json({ error: 'Unauthorised' }, { status: 401 })

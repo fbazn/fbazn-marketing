@@ -1,12 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createAdminClient } from '@/lib/supabase-admin'
-import { createClient } from '@/lib/supabase-browser'
+import { createRouteClient } from '@/lib/supabase-server'
 
 const ADMIN_EMAIL = process.env.AFFILIATE_ADMIN_EMAIL
 
 async function verifyAdmin(): Promise<boolean> {
-  const browserClient = createClient()
-  const { data: { user } } = await browserClient.auth.getUser()
+  const supabaseAuth = await createRouteClient()
+  const { data: { user } } = await supabaseAuth.auth.getUser()
   return !!user && user.email === ADMIN_EMAIL
 }
 
