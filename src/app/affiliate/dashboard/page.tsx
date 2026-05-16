@@ -99,7 +99,11 @@ function AffiliateDashboardContent() {
     setConnectLoading(true)
     const res = await fetch('/api/affiliate/connect', { method: 'POST' })
     const { url, error } = await res.json()
-    if (error) { setConnectLoading(false); return }
+    if (error) {
+      alert(`Stripe Connect error: ${error}`)
+      setConnectLoading(false)
+      return
+    }
     window.location.href = url
   }
 

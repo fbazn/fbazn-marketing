@@ -26,29 +26,35 @@ export async function POST(request: NextRequest) {
 
   let accountId = affiliate.stripe_connect_account_id
 
-  if (!accountId) {
-    const account = await stripe.accounts.create({
-      type: 'express',
-      country: 'GB',
-      email: user.email,
-      capabilities: { transfers: { requested: true } },
+  try {
+    if (!accountId) {
+      const account = await stripe.accounts.create({
+        type: 'express',
+        country: 'GB',
+        email: user.email,
+        capabilities: { transfers: { requested: true } },
+      })
+      accountId = account.id
+
+      await supabase
+        .from('affiliates')
+        .update({ stripe_connect_account_id: accountId })
+        .eq('id', affiliate.id)
+    }
+
+    const origin = request.headers.get('origin') ?? 'https://fbazn.com'
+
+    const accountLink = await stripe.accountLinks.create({
+      account: accountId,
+      refresh_url: `${origin}/affiliate/dashboard?connect=refresh`,
+      return_url: `${origin}/affiliate/dashboard?connect=success`,
+      type: 'account_onboarding',
     })
-    accountId = account.id
 
-    await supabase
-      .from('affiliates')
-      .update({ stripe_connect_account_id: accountId })
-      .eq('id', affiliate.id)
+    return NextResponse.json({ url: accountLink.url })
+  } catch (err) {
+    const message = err instanceof Error ? err.message : 'Stripe error'
+    console.error('[connect] Stripe error:', message)
+    return NextResponse.json({ error: message }, { status: 500 })
   }
-
-  const origin = request.headers.get('origin') ?? 'https://fbazn.com'
-
-  const accountLink = await stripe.accountLinks.create({
-    account: accountId,
-    refresh_url: `${origin}/affiliate/dashboard?connect=refresh`,
-    return_url: `${origin}/affiliate/dashboard?connect=success`,
-    type: 'account_onboarding',
-  })
-
-  return NextResponse.json({ url: accountLink.url })
 }
