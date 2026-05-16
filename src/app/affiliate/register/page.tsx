@@ -6,7 +6,7 @@ import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase-browser'
 import { sanitiseCode } from '@/lib/affiliate'
 
-type Step = 'account' | 'code' | 'done'
+type Step = 'account' | 'code' | 'link' | 'done'
 
 export default function AffiliateRegisterPage() {
   const router = useRouter()
@@ -14,6 +14,7 @@ export default function AffiliateRegisterPage() {
   const [fullName, setFullName] = useState('')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
+  const [linkPassword, setLinkPassword] = useState('')
   const [code, setCode] = useState('')
   const [codeStatus, setCodeStatus] = useState<'idle' | 'checking' | 'available' | 'taken'>('idle')
   const [loading, setLoading] = useState(false)
@@ -33,7 +34,7 @@ export default function AffiliateRegisterPage() {
     return () => clearTimeout(t)
   }, [code])
 
-  async function handleRegister() {
+  function handleRegister() {
     setError('')
     if (!fullName.trim() || !email.trim() || !password) {
       setError('Please fill in all fields.')
@@ -46,6 +47,7 @@ export default function AffiliateRegisterPage() {
     setStep('code')
   }
 
+  // Step 2 → submit: create new account or detect existing user
   async function handleSubmit() {
     setError('')
     const cleanCode = sanitiseCode(code)
@@ -61,6 +63,12 @@ export default function AffiliateRegisterPage() {
       })
       const json = await res.json()
 
+      // Existing FBAZN account detected — ask them to sign in to link
+      if (json.existingUser) {
+        setStep('link')
+        return
+      }
+
       if (!res.ok) {
         setError(json.error ?? 'Something went wrong.')
         return
@@ -75,6 +83,68 @@ export default function AffiliateRegisterPage() {
     } finally {
       setLoading(false)
     }
+  }
+
+  // Step link → sign in with existing password, then link affiliate account
+  async function handleLink() {
+    setError('')
+    if (!linkPassword) { setError('Please enter your password.'); return }
+
+    setLoading(true)
+    try {
+      const supabase = createClient()
+      const { error: authError } = await supabase.auth.signInWithPassword({
+        email,
+        password: linkPassword,
+      })
+
+      if (authError) {
+        setError('Incorrect password. Please try again.')
+        return
+      }
+
+      // Get the session token to pass to the API
+      const { data: { session } } = await supabase.auth.getSession()
+      if (!session) {
+        setError('Session error. Please try again.')
+        return
+      }
+
+      const cleanCode = sanitiseCode(code)
+      const res = await fetch('/api/affiliate/register', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${session.access_token}`,
+        },
+        body: JSON.stringify({ full_name: fullName, code: cleanCode, linkExisting: true }),
+      })
+      const json = await res.json()
+
+      if (!res.ok) {
+        setError(json.error ?? 'Something went wrong.')
+        return
+      }
+
+      setStep('done')
+      setTimeout(() => router.push('/affiliate/dashboard'), 2000)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const stepTitle: Record<Step, string> = {
+    account: 'Join the programme',
+    code: 'Choose your code',
+    link: 'Link your account',
+    done: "You're in.",
+  }
+
+  const stepSubtitle: Record<Step, string> = {
+    account: 'Create your affiliate account.',
+    code: 'Choose your referral code — this is what goes in your link.',
+    link: `We found an existing FBAZN account for ${email}. Sign in with your FBAZN password to link it as an affiliate account.`,
+    done: 'Taking you to your dashboard now…',
   }
 
   return (
@@ -104,12 +174,10 @@ export default function AffiliateRegisterPage() {
             className="mt-4 text-3xl font-black uppercase tracking-[0.06em] text-white"
             style={{ fontFamily: 'var(--font-barlow-condensed)' }}
           >
-            {step === 'done' ? 'You\'re in.' : 'Join the programme'}
+            {stepTitle[step]}
           </h1>
           <p className="mt-1 text-sm text-[#8b9cc8]">
-            {step === 'account' && 'Create your affiliate account.'}
-            {step === 'code' && 'Choose your referral code — this is what goes in your link.'}
-            {step === 'done' && 'Taking you to your dashboard now…'}
+            {stepSubtitle[step]}
           </p>
 
           {error && (
@@ -122,10 +190,7 @@ export default function AffiliateRegisterPage() {
           {step === 'account' && (
             <div className="mt-6 space-y-4">
               <div>
-                <label
-                  className="block text-[11px] font-bold uppercase tracking-[0.12em] text-[#8b9cc8] mb-1.5"
-                  style={{ fontFamily: 'var(--font-barlow-condensed)' }}
-                >
+                <label className="block text-[11px] font-bold uppercase tracking-[0.12em] text-[#8b9cc8] mb-1.5" style={{ fontFamily: 'var(--font-barlow-condensed)' }}>
                   Full name
                 </label>
                 <input
@@ -137,10 +202,7 @@ export default function AffiliateRegisterPage() {
                 />
               </div>
               <div>
-                <label
-                  className="block text-[11px] font-bold uppercase tracking-[0.12em] text-[#8b9cc8] mb-1.5"
-                  style={{ fontFamily: 'var(--font-barlow-condensed)' }}
-                >
+                <label className="block text-[11px] font-bold uppercase tracking-[0.12em] text-[#8b9cc8] mb-1.5" style={{ fontFamily: 'var(--font-barlow-condensed)' }}>
                   Email
                 </label>
                 <input
@@ -152,10 +214,7 @@ export default function AffiliateRegisterPage() {
                 />
               </div>
               <div>
-                <label
-                  className="block text-[11px] font-bold uppercase tracking-[0.12em] text-[#8b9cc8] mb-1.5"
-                  style={{ fontFamily: 'var(--font-barlow-condensed)' }}
-                >
+                <label className="block text-[11px] font-bold uppercase tracking-[0.12em] text-[#8b9cc8] mb-1.5" style={{ fontFamily: 'var(--font-barlow-condensed)' }}>
                   Password
                 </label>
                 <input
@@ -165,6 +224,9 @@ export default function AffiliateRegisterPage() {
                   placeholder="Min. 8 characters"
                   className="w-full rounded bg-[#080c18] border border-[#1e2d4a] px-3.5 py-2.5 text-sm text-[#f0f4ff] placeholder-[#4a5a80] outline-none focus:border-amber-500 focus:ring-2 focus:ring-amber-500/15 transition"
                 />
+                <p className="mt-1.5 text-xs text-[#4a5a80]">
+                  Already have an FBAZN account? Just use the same email — we'll link them automatically.
+                </p>
               </div>
               <button
                 onClick={handleRegister}
@@ -184,10 +246,7 @@ export default function AffiliateRegisterPage() {
           {step === 'code' && (
             <div className="mt-6 space-y-4">
               <div>
-                <label
-                  className="block text-[11px] font-bold uppercase tracking-[0.12em] text-[#8b9cc8] mb-1.5"
-                  style={{ fontFamily: 'var(--font-barlow-condensed)' }}
-                >
+                <label className="block text-[11px] font-bold uppercase tracking-[0.12em] text-[#8b9cc8] mb-1.5" style={{ fontFamily: 'var(--font-barlow-condensed)' }}>
                   Your referral code
                 </label>
                 <div className="flex items-center gap-0">
@@ -242,13 +301,68 @@ export default function AffiliateRegisterPage() {
             </div>
           )}
 
-          {/* Step 3 — Done */}
+          {/* Step link — existing FBAZN user, sign in to link */}
+          {step === 'link' && (
+            <div className="mt-6 space-y-4">
+              <div className="rounded border border-amber-500/20 bg-amber-500/5 px-4 py-3 text-xs text-amber-300/80">
+                Your FBAZN account and affiliate account will share the same login — one set of credentials for both.
+              </div>
+              <div>
+                <label className="block text-[11px] font-bold uppercase tracking-[0.12em] text-[#8b9cc8] mb-1.5" style={{ fontFamily: 'var(--font-barlow-condensed)' }}>
+                  Email
+                </label>
+                <input
+                  type="email"
+                  value={email}
+                  disabled
+                  className="w-full rounded bg-[#080c18]/40 border border-[#1e2d4a] px-3.5 py-2.5 text-sm text-[#4a5a80] outline-none cursor-not-allowed"
+                />
+              </div>
+              <div>
+                <label className="block text-[11px] font-bold uppercase tracking-[0.12em] text-[#8b9cc8] mb-1.5" style={{ fontFamily: 'var(--font-barlow-condensed)' }}>
+                  Your FBAZN password
+                </label>
+                <input
+                  type="password"
+                  value={linkPassword}
+                  onChange={e => setLinkPassword(e.target.value)}
+                  onKeyDown={e => e.key === 'Enter' && handleLink()}
+                  placeholder="••••••••"
+                  autoFocus
+                  className="w-full rounded bg-[#080c18] border border-[#1e2d4a] px-3.5 py-2.5 text-sm text-[#f0f4ff] placeholder-[#4a5a80] outline-none focus:border-amber-500 focus:ring-2 focus:ring-amber-500/15 transition"
+                />
+              </div>
+              <div className="flex gap-3">
+                <button
+                  onClick={() => { setStep('code'); setError('') }}
+                  className="flex-1 py-3 text-sm font-bold uppercase tracking-[0.1em] text-[#8b9cc8] border border-[#1e2d4a] rounded transition hover:border-amber-500/50 hover:text-white"
+                  style={{ fontFamily: 'var(--font-barlow-condensed)' }}
+                >
+                  Back
+                </button>
+                <button
+                  onClick={handleLink}
+                  disabled={loading || !linkPassword}
+                  className="flex-1 py-3 text-sm font-extrabold uppercase tracking-[0.12em] text-white transition hover:-translate-y-0.5 disabled:opacity-50 disabled:cursor-not-allowed disabled:translate-y-0"
+                  style={{
+                    fontFamily: 'var(--font-barlow-condensed)',
+                    background: 'linear-gradient(135deg, #f59e0b, #d97706)',
+                    clipPath: 'polygon(8px 0%, 100% 0%, calc(100% - 8px) 100%, 0% 100%)',
+                  }}
+                >
+                  {loading ? 'Linking…' : 'Link account'}
+                </button>
+              </div>
+            </div>
+          )}
+
+          {/* Step done */}
           {step === 'done' && (
             <div className="mt-8 text-center">
               <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-emerald-500/15 border border-emerald-500/30">
                 <span className="text-2xl">✓</span>
               </div>
-              <p className="text-sm text-[#8b9cc8]">Account created. Redirecting to your dashboard…</p>
+              <p className="text-sm text-[#8b9cc8]">Account linked. Redirecting to your dashboard…</p>
             </div>
           )}
         </div>

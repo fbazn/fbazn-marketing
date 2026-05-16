@@ -11,6 +11,7 @@ export default function AffiliateLogin() {
   const [password, setPassword] = useState('')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [noAffiliate, setNoAffiliate] = useState(false)
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
@@ -26,7 +27,7 @@ export default function AffiliateLogin() {
       return
     }
 
-    // Verify this user is actually an affiliate
+    // Check if this user has an affiliate account
     const { data: affiliate } = await supabase
       .from('affiliates')
       .select('id')
@@ -34,8 +35,8 @@ export default function AffiliateLogin() {
       .maybeSingle()
 
     if (!affiliate) {
-      await supabase.auth.signOut()
-      setError('No affiliate account found for this email. If you want to join, register below.')
+      // Valid FBAZN account but no affiliate profile — show a prompt to join
+      setNoAffiliate(true)
       setLoading(false)
       return
     }
@@ -120,6 +121,20 @@ export default function AffiliateLogin() {
               {loading ? 'Signing in…' : 'Sign in'}
             </button>
           </form>
+
+          {noAffiliate && (
+            <div className="mt-4 rounded border border-amber-500/30 bg-amber-500/8 px-4 py-4 text-sm">
+              <p className="font-semibold text-amber-300">You have an FBAZN account but haven't joined the affiliate programme yet.</p>
+              <p className="mt-1 text-amber-500/70 text-xs">Head to the register page — enter the same email and pick a referral code. We'll link both accounts automatically.</p>
+              <Link
+                href="/affiliate/register"
+                className="mt-3 inline-block text-xs font-bold uppercase tracking-[0.1em] text-amber-400 hover:text-amber-300 transition"
+                style={{ fontFamily: 'var(--font-barlow-condensed)' }}
+              >
+                Set up affiliate account →
+              </Link>
+            </div>
+          )}
 
           <p className="mt-6 text-center text-xs text-[#4a5a80]">
             Don't have an account?{' '}
