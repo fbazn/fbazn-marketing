@@ -76,11 +76,11 @@ function AffiliateDashboardContent() {
   useEffect(() => {
     const supabase = createClient()
     supabase.auth.getUser().then(({ data: { user } }) => {
-      if (!user) { router.replace('/affiliate'); return }
+      if (!user) { router.replace('/affiliate/login'); return }
       fetch('/api/affiliate/stats')
         .then(r => r.json())
         .then(data => {
-          if (data.error) { router.replace('/affiliate'); return }
+          if (data.error) { router.replace('/affiliate/login'); return }
           setStats(data)
         })
         .finally(() => setLoading(false))

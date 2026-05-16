@@ -76,7 +76,7 @@ export default function AffiliateLandingPage() {
             ))}
           </nav>
           <div className="flex items-center gap-3">
-            <Link href="/affiliate/dashboard" className="text-xs font-bold uppercase tracking-[0.1em] text-[#8b9cc8] transition hover:text-white" style={{ fontFamily: 'var(--font-barlow-condensed)' }}>
+            <Link href="/affiliate/login" className="text-xs font-bold uppercase tracking-[0.1em] text-[#8b9cc8] transition hover:text-white" style={{ fontFamily: 'var(--font-barlow-condensed)' }}>
               Sign in
             </Link>
             <Link
@@ -293,7 +293,7 @@ export default function AffiliateLandingPage() {
             >
               Create your affiliate account
             </Link>
-            <p className="mt-4 text-xs text-[#4a5a80]">Already have an account? <Link href="/affiliate/dashboard" className="text-[#8b9cc8] hover:text-white transition">Sign in →</Link></p>
+            <p className="mt-4 text-xs text-[#4a5a80]">Already have an account? <Link href="/affiliate/login" className="text-[#8b9cc8] hover:text-white transition">Sign in →</Link></p>
           </div>
         </section>
       </main>
