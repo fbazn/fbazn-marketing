@@ -1,0 +1,123 @@
+{
+  "name": "AffiliateApproval",
+  "nodes": [
+    {
+      "id": "sched-aff-001",
+      "name": "Daily 9am",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.3,
+      "position": [-800, 0],
+      "parameters": {
+        "rule": {
+          "interval": [{ "field": "cronExpression", "expression": "0 9 * * *" }]
+        }
+      }
+    },
+    {
+      "id": "fetch-aff-001",
+      "name": "Get Pending Past Hold",
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [-576, 0],
+      "parameters": {
+        "operation": "getAll",
+        "tableId": "affiliate_referrals",
+        "returnAll": true,
+        "filters": {
+          "conditions": [
+            { "keyName": "status", "condition": "eq", "keyValue": "pending" },
+            { "keyName": "hold_until", "condition": "lt", "keyValue": "={{ $now.toISO() }}" }
+          ]
+        }
+      },
+      "credentials": { "supabaseApi": { "id": "FBtHmHfyFPJ7FXrN", "name": "Supabase account" } }
+    },
+    {
+      "id": "filter-aff-001",
+      "name": "Has First Payment?",
+      "type": "n8n-nodes-base.filter",
+      "typeVersion": 2,
+      "position": [-352, 0],
+      "parameters": {
+        "conditions": {
+          "options": { "caseSensitive": true, "leftValue": "", "typeValidation": "loose" },
+          "conditions": [
+            {
+              "id": "cond-has-payment",
+              "leftValue": "={{ $json.first_payment_at }}",
+              "rightValue": "",
+              "operator": { "type": "string", "operation": "notEmpty" }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      }
+    },
+    {
+      "id": "loop-aff-001",
+      "name": "Loop Referrals",
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [-128, 0],
+      "parameters": { "batchSize": 1, "options": {} }
+    },
+    {
+      "id": "upd-ref-001",
+      "name": "Approve Referral",
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [96, 0],
+      "parameters": {
+        "operation": "update",
+        "tableId": "affiliate_referrals",
+        "filters": {
+          "conditions": [{ "keyName": "id", "condition": "eq", "keyValue": "={{ $json.id }}" }]
+        },
+        "fieldsUi": {
+          "fieldValues": [
+            { "fieldId": "status", "fieldValue": "approved" },
+            { "fieldId": "approved_at", "fieldValue": "={{ $now.toISO() }}" }
+          ]
+        }
+      },
+      "credentials": { "supabaseApi": { "id": "FBtHmHfyFPJ7FXrN", "name": "Supabase account" } }
+    },
+    {
+      "id": "upd-comm-001",
+      "name": "Approve Commissions",
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [320, 0],
+      "parameters": {
+        "operation": "update",
+        "tableId": "affiliate_commissions",
+        "filters": {
+          "conditions": [
+            { "keyName": "referral_id", "condition": "eq", "keyValue": "={{ $('Loop Referrals').item.json.id }}" },
+            { "keyName": "status", "condition": "eq", "keyValue": "pending" }
+          ]
+        },
+        "fieldsUi": {
+          "fieldValues": [{ "fieldId": "status", "fieldValue": "approved" }]
+        }
+      },
+      "credentials": { "supabaseApi": { "id": "FBtHmHfyFPJ7FXrN", "name": "Supabase account" } }
+    }
+  ],
+  "connections": {
+    "Daily 9am": { "main": [[{ "node": "Get Pending Past Hold", "type": "main", "index": 0 }]] },
+    "Get Pending Past Hold": { "main": [[{ "node": "Has First Payment?", "type": "main", "index": 0 }]] },
+    "Has First Payment?": { "main": [[{ "node": "Loop Referrals", "type": "main", "index": 0 }]] },
+    "Loop Referrals": {
+      "main": [
+        [{ "node": "Approve Referral", "type": "main", "index": 0 }],
+        []
+      ]
+    },
+    "Approve Referral": { "main": [[{ "node": "Approve Commissions", "type": "main", "index": 0 }]] },
+    "Approve Commissions": { "main": [[{ "node": "Loop Referrals", "type": "main", "index": 0 }]] }
+  },
+  "settings": { "executionOrder": "v1" },
+  "staticData": null
+}

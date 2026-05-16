@@ -1,0 +1,282 @@
+{
+  "name": "AffiliateMonthlyPayout",
+  "nodes": [
+    {
+      "id": "sched-pay-001",
+      "name": "15th of Month 10am",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.3,
+      "position": [-1200, 0],
+      "parameters": {
+        "rule": {
+          "interval": [{ "field": "cronExpression", "expression": "0 10 15 * *" }]
+        }
+      }
+    },
+    {
+      "id": "code-dates-001",
+      "name": "Calc Last Month",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [-976, 0],
+      "parameters": {
+        "jsCode": "const now = new Date();\nconst lastMonth = new Date(now.getFullYear(), now.getMonth() - 1, 1);\nconst lastMonthEnd = new Date(now.getFullYear(), now.getMonth(), 0);\nconst periodMonth = lastMonth.toISOString().split('T')[0];\nconst periodLabel = lastMonth.toLocaleDateString('en-GB', { month: 'long', year: 'numeric' });\nconst scheduledFor = new Date(now.getFullYear(), now.getMonth(), 15).toISOString().split('T')[0];\nreturn [{ json: { periodMonth, periodLabel, scheduledFor } }];"
+      }
+    },
+    {
+      "id": "fetch-comm-001",
+      "name": "Get Approved Commissions",
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [-752, 0],
+      "parameters": {
+        "operation": "getAll",
+        "tableId": "affiliate_commissions",
+        "returnAll": true,
+        "filters": {
+          "conditions": [
+            { "keyName": "status", "condition": "eq", "keyValue": "approved" },
+            { "keyName": "commission_month", "condition": "eq", "keyValue": "={{ $json.periodMonth }}" }
+          ]
+        }
+      },
+      "credentials": { "supabaseApi": { "id": "FBtHmHfyFPJ7FXrN", "name": "Supabase account" } }
+    },
+    {
+      "id": "code-group-001",
+      "name": "Group By Affiliate",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [-528, 0],
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "jsCode": "const items = $input.all();\nconst periodMonth = $('Calc Last Month').first().json.periodMonth;\nconst scheduledFor = $('Calc Last Month').first().json.scheduledFor;\nconst periodLabel = $('Calc Last Month').first().json.periodLabel;\n\nconst groups = {};\nfor (const item of items) {\n  const c = item.json;\n  if (!groups[c.affiliate_id]) {\n    groups[c.affiliate_id] = {\n      affiliate_id: c.affiliate_id,\n      commission_ids: [],\n      total_gross: 0,\n      commission_count: 0,\n      periodMonth,\n      scheduledFor,\n      periodLabel\n    };\n  }\n  groups[c.affiliate_id].commission_ids.push(c.id);\n  groups[c.affiliate_id].total_gross += parseFloat(c.gross_amount || 0);\n  groups[c.affiliate_id].commission_count += 1;\n}\n\nreturn Object.values(groups).map(g => ({ json: g }));"
+      }
+    },
+    {
+      "id": "loop-pay-001",
+      "name": "Loop Affiliates",
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [-304, 0],
+      "parameters": { "batchSize": 1, "options": {} }
+    },
+    {
+      "id": "fetch-aff-pay-001",
+      "name": "Get Affiliate Record",
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [-80, 0],
+      "parameters": {
+        "operation": "getAll",
+        "tableId": "affiliates",
+        "returnAll": false,
+        "limit": 1,
+        "filters": {
+          "conditions": [
+            { "keyName": "id", "condition": "eq", "keyValue": "={{ $json.affiliate_id }}" }
+          ]
+        }
+      },
+      "credentials": { "supabaseApi": { "id": "FBtHmHfyFPJ7FXrN", "name": "Supabase account" } }
+    },
+    {
+      "id": "fetch-rank-001",
+      "name": "Get Leaderboard Rank",
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [144, 0],
+      "parameters": {
+        "operation": "getAll",
+        "tableId": "affiliate_leaderboard",
+        "returnAll": false,
+        "limit": 1,
+        "filters": {
+          "conditions": [
+            { "keyName": "id", "condition": "eq", "keyValue": "={{ $('Loop Affiliates').item.json.affiliate_id }}" }
+          ]
+        }
+      },
+      "credentials": { "supabaseApi": { "id": "FBtHmHfyFPJ7FXrN", "name": "Supabase account" } }
+    },
+    {
+      "id": "code-payout-001",
+      "name": "Calc Payout",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [368, 0],
+      "parameters": {
+        "jsCode": "const group = $('Loop Affiliates').item.json;\nconst affiliate = $('Get Affiliate Record').first().json;\nconst leaderboard = $('Get Leaderboard Rank').first()?.json || {};\n\nconst rank = parseInt(leaderboard.rank) || 999;\nconst boost = rank <= 3 ? 0.05 : rank <= 5 ? 0.025 : rank <= 10 ? 0.01 : 0;\nconst rate = 0.20 + boost;\nconst total = parseFloat((group.total_gross * rate).toFixed(2));\n\nreturn [{\n  json: {\n    ...group,\n    affiliate_id: affiliate.id,\n    full_name: affiliate.full_name,\n    email: affiliate.email,\n    stripe_connect_account_id: affiliate.stripe_connect_account_id,\n    stripe_connect_onboarded: affiliate.stripe_connect_onboarded,\n    balance_approved: affiliate.balance_approved,\n    rank,\n    boost,\n    rate,\n    total,\n    eligible: total >= 20 && affiliate.stripe_connect_onboarded === true && !!affiliate.stripe_connect_account_id\n  }\n}];"
+      }
+    },
+    {
+      "id": "if-eligible-001",
+      "name": "Eligible for Payout?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [592, 0],
+      "parameters": {
+        "conditions": {
+          "options": { "caseSensitive": true, "leftValue": "", "typeValidation": "strict" },
+          "conditions": [
+            {
+              "id": "cond-eligible",
+              "leftValue": "={{ $json.eligible }}",
+              "rightValue": true,
+              "operator": { "type": "boolean", "operation": "true" }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      }
+    },
+    {
+      "id": "stripe-transfer-001",
+      "name": "Stripe Transfer",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [816, -100],
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.stripe.com/v1/transfers",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpBasicAuth",
+        "sendBody": true,
+        "contentType": "form-urlencoded",
+        "bodyParameters": {
+          "parameters": [
+            { "name": "amount", "value": "={{ Math.round($json.total * 100) }}" },
+            { "name": "currency", "value": "gbp" },
+            { "name": "destination", "value": "={{ $json.stripe_connect_account_id }}" },
+            { "name": "description", "value": "=FBAZN affiliate payout - {{ $json.periodLabel }}" }
+          ]
+        },
+        "options": {}
+      },
+      "credentials": { "httpBasicAuth": { "id": "jvoS6krOBTP2MF1d", "name": "Stripe Live Key" } }
+    },
+    {
+      "id": "create-payout-001",
+      "name": "Create Payout Record",
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [1040, -100],
+      "parameters": {
+        "operation": "create",
+        "tableId": "affiliate_payouts",
+        "fieldsUi": {
+          "fieldValues": [
+            { "fieldId": "affiliate_id", "fieldValue": "={{ $('Calc Payout').item.json.affiliate_id }}" },
+            { "fieldId": "period_month", "fieldValue": "={{ $('Calc Payout').item.json.periodMonth }}" },
+            { "fieldId": "total_amount", "fieldValue": "={{ $('Calc Payout').item.json.total }}" },
+            { "fieldId": "commission_count", "fieldValue": "={{ $('Calc Payout').item.json.commission_count }}" },
+            { "fieldId": "stripe_transfer_id", "fieldValue": "={{ $('Stripe Transfer').item.json.id }}" },
+            { "fieldId": "status", "fieldValue": "paid" },
+            { "fieldId": "scheduled_for", "fieldValue": "={{ $('Calc Payout').item.json.scheduledFor }}" },
+            { "fieldId": "paid_at", "fieldValue": "={{ $now.toISO() }}" }
+          ]
+        }
+      },
+      "credentials": { "supabaseApi": { "id": "FBtHmHfyFPJ7FXrN", "name": "Supabase account" } }
+    },
+    {
+      "id": "mark-paid-comm-001",
+      "name": "Mark Commissions Paid",
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [1264, -100],
+      "parameters": {
+        "operation": "update",
+        "tableId": "affiliate_commissions",
+        "filters": {
+          "conditions": [
+            { "keyName": "affiliate_id", "condition": "eq", "keyValue": "={{ $('Calc Payout').item.json.affiliate_id }}" },
+            { "keyName": "commission_month", "condition": "eq", "keyValue": "={{ $('Calc Payout').item.json.periodMonth }}" },
+            { "keyName": "status", "condition": "eq", "keyValue": "approved" }
+          ]
+        },
+        "fieldsUi": {
+          "fieldValues": [
+            { "fieldId": "status", "fieldValue": "paid" },
+            { "fieldId": "payout_id", "fieldValue": "={{ $('Create Payout Record').item.json.id }}" }
+          ]
+        }
+      },
+      "credentials": { "supabaseApi": { "id": "FBtHmHfyFPJ7FXrN", "name": "Supabase account" } }
+    },
+    {
+      "id": "update-balance-001",
+      "name": "Update Affiliate Balance",
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [1488, -100],
+      "parameters": {
+        "operation": "update",
+        "tableId": "affiliates",
+        "filters": {
+          "conditions": [
+            { "keyName": "id", "condition": "eq", "keyValue": "={{ $('Calc Payout').item.json.affiliate_id }}" }
+          ]
+        },
+        "fieldsUi": {
+          "fieldValues": [
+            { "fieldId": "balance_approved", "fieldValue": "={{ Math.max(0, parseFloat($('Calc Payout').item.json.balance_approved) - parseFloat($('Calc Payout').item.json.total)) }}" },
+            { "fieldId": "total_earned", "fieldValue": "={{ parseFloat($('Get Affiliate Record').item.json.total_earned) + parseFloat($('Calc Payout').item.json.total) }}" }
+          ]
+        }
+      },
+      "credentials": { "supabaseApi": { "id": "FBtHmHfyFPJ7FXrN", "name": "Supabase account" } }
+    },
+    {
+      "id": "email-payout-001",
+      "name": "Send Payout Email",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [1712, -100],
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.resend.com/emails",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            { "name": "Authorization", "value": "Bearer re_D5KMqrFo_7HbbUDAVxMrzuLyyocvpV4yg" },
+            { "name": "Content-Type", "value": "application/json" }
+          ]
+        },
+        "sendBody": true,
+        "contentType": "json",
+        "body": "={\n  \"from\": \"hello@fbazn.com\",\n  \"to\": \"{{ $('Calc Payout').item.json.email }}\",\n  \"subject\": \"Your FBAZN affiliate payout is on its way — £{{ $('Calc Payout').item.json.total.toFixed(2) }}\",\n  \"html\": \"<p>Hi {{ $('Calc Payout').item.json.full_name }},</p><p>Great news — your affiliate payout of <strong>£{{ $('Calc Payout').item.json.total.toFixed(2) }}</strong> for {{ $('Calc Payout').item.json.periodLabel }} has been sent via Stripe.</p><p>It should arrive in your bank account within 1–3 business days.</p><p>Your commission rate this month: <strong>{{ ($('Calc Payout').item.json.rate * 100).toFixed(1) }}%</strong> (Leaderboard rank #{{ $('Calc Payout').item.json.rank }}).</p><p>Keep sharing your link to climb the leaderboard and earn up to 25% next month.</p><p>— FBAZN</p>\"\n}",
+        "options": {}
+      }
+    }
+  ],
+  "connections": {
+    "15th of Month 10am": { "main": [[{ "node": "Calc Last Month", "type": "main", "index": 0 }]] },
+    "Calc Last Month": { "main": [[{ "node": "Get Approved Commissions", "type": "main", "index": 0 }]] },
+    "Get Approved Commissions": { "main": [[{ "node": "Group By Affiliate", "type": "main", "index": 0 }]] },
+    "Group By Affiliate": { "main": [[{ "node": "Loop Affiliates", "type": "main", "index": 0 }]] },
+    "Loop Affiliates": {
+      "main": [
+        [{ "node": "Get Affiliate Record", "type": "main", "index": 0 }],
+        []
+      ]
+    },
+    "Get Affiliate Record": { "main": [[{ "node": "Get Leaderboard Rank", "type": "main", "index": 0 }]] },
+    "Get Leaderboard Rank": { "main": [[{ "node": "Calc Payout", "type": "main", "index": 0 }]] },
+    "Calc Payout": { "main": [[{ "node": "Eligible for Payout?", "type": "main", "index": 0 }]] },
+    "Eligible for Payout?": {
+      "main": [
+        [{ "node": "Stripe Transfer", "type": "main", "index": 0 }],
+        [{ "node": "Loop Affiliates", "type": "main", "index": 0 }]
+      ]
+    },
+    "Stripe Transfer": { "main": [[{ "node": "Create Payout Record", "type": "main", "index": 0 }]] },
+    "Create Payout Record": { "main": [[{ "node": "Mark Commissions Paid", "type": "main", "index": 0 }]] },
+    "Mark Commissions Paid": { "main": [[{ "node": "Update Affiliate Balance", "type": "main", "index": 0 }]] },
+    "Update Affiliate Balance": { "main": [[{ "node": "Send Payout Email", "type": "main", "index": 0 }]] },
+    "Send Payout Email": { "main": [[{ "node": "Loop Affiliates", "type": "main", "index": 0 }]] }
+  },
+  "settings": { "executionOrder": "v1" },
+  "staticData": null
+}
