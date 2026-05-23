@@ -1,6 +1,7 @@
 import './globals.css'
 import type { Metadata } from 'next'
 import { Barlow, Barlow_Condensed } from 'next/font/google'
+import Script from 'next/script'
 
 const siteTitle = 'FBAZN — Amazon FBA Dashboard'
 const siteDescription =
@@ -45,6 +46,13 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <html lang="en" className={`${barlow.variable} ${barlowCondensed.variable}`}>
       <body className="min-h-screen bg-[#080c18] text-[#f0f4ff] antialiased">
         {children}
+        <Script src="https://www.googletagmanager.com/gtag/js?id=G-KGN4E64GE4" strategy="afterInteractive" />
+        <Script id="google-analytics" strategy="afterInteractive">{`
+          window.dataLayer = window.dataLayer || [];
+          function gtag(){dataLayer.push(arguments);}
+          gtag('js', new Date());
+          gtag('config', 'G-KGN4E64GE4');
+        `}</Script>
       </body>
     </html>
   )
