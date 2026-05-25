@@ -149,7 +149,7 @@ export default function ComparisonPage() {
 
   return (
     <>
-      <Header />
+      <Header onCtaClick={openModal} />
       <main className="relative min-h-screen overflow-hidden bg-[#080c18] text-[#f0f4ff]">
         {/* Background */}
         <div className="pointer-events-none absolute inset-0">

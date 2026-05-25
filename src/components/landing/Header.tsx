@@ -14,9 +14,10 @@ const navItems = [
 
 type HeaderProps = {
   onNavigate?: (id: string) => void
+  onCtaClick?: () => void
 }
 
-export default function Header({ onNavigate }: HeaderProps) {
+export default function Header({ onNavigate, onCtaClick }: HeaderProps) {
   const handleNavClick = (id: string) => (event: MouseEvent<HTMLAnchorElement>) => {
     if (!onNavigate) {
       return
@@ -57,12 +58,22 @@ export default function Header({ onNavigate }: HeaderProps) {
             Free tools
           </Link>
         </nav>
-        <Link
-          href={APP_SIGNUP_URL}
-          className="border border-amber-400/50 bg-amber-400 px-4 py-2 text-xs font-black uppercase tracking-[0.18em] text-[#080c18] shadow-[0_0_22px_rgba(245,158,11,0.22)] transition hover:-translate-y-0.5 hover:bg-amber-300"
-        >
-          Start trial
-        </Link>
+        {onCtaClick ? (
+          <button
+            type="button"
+            onClick={onCtaClick}
+            className="border border-amber-400/50 bg-amber-400 px-4 py-2 text-xs font-black uppercase tracking-[0.18em] text-[#080c18] shadow-[0_0_22px_rgba(245,158,11,0.22)] transition hover:-translate-y-0.5 hover:bg-amber-300"
+          >
+            Start trial
+          </button>
+        ) : (
+          <Link
+            href={APP_SIGNUP_URL}
+            className="border border-amber-400/50 bg-amber-400 px-4 py-2 text-xs font-black uppercase tracking-[0.18em] text-[#080c18] shadow-[0_0_22px_rgba(245,158,11,0.22)] transition hover:-translate-y-0.5 hover:bg-amber-300"
+          >
+            Start trial
+          </Link>
+        )}
       </div>
     </header>
   )
